@@ -2,9 +2,10 @@ import pygame
 from pygame import Surface
 
 from extensions import load_image
+from resources.button import Button
 
 
-def start_screen(screen: Surface) -> None:
+def start_screen(screen: Surface, button_group) -> None:
     intro_text = ["ЗАСТАВКА", "",
                   "Правила игры",
                   "Если в правилах несколько строк,",
@@ -12,7 +13,7 @@ def start_screen(screen: Surface) -> None:
 
     fon = pygame.transform.scale(load_image('fon.jpg'), (screen.get_width(), screen.get_height()))
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
+    font = pygame.font.Font(None, 50)
     text_coord = 50
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
@@ -22,3 +23,6 @@ def start_screen(screen: Surface) -> None:
         intro_rect.x = 10
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
+    b_start_game = Button(30, 200, 300, 70, "Start Game", 0)
+
+    button_group.append(b_start_game)

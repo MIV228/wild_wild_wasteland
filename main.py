@@ -34,12 +34,14 @@ if __name__ == '__main__':
     pygame.init()
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Mario")
+    pygame.display.set_caption("Wild Wild Wasteland")
 
     clock = pygame.time.Clock()
 
+    button_group = []
+
     # отрисовываем начальный экран
-    start_screen(screen)
+    start_screen(screen, button_group)
 
     # основной персонаж
     player = None
@@ -55,28 +57,50 @@ if __name__ == '__main__':
     player, level_x, level_y = generate_level(load_level('map1.txt'), tiles_group, player_group, wall_group, all_sprites)
 
     running = True
-    # игра начнется после нажатия любой кнопки
-    start_game = False
+    curr_screen = 1 # 0 - игра, 1 - главное меню
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()
-            elif event.type == pygame.KEYDOWN or \
-                    event.type == pygame.MOUSEBUTTONDOWN:
-                start_game = True
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if curr_screen != 0:
+                        curr_screen = 0
+                    else:
+                        curr_screen = 1
+                        start_screen(screen, button_group)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if curr_screen != 0:
+                    x, y = pygame.mouse.get_pos()
+                    for button in button_group:
+                        if button.check_clicked(x, y):
+                            if button.function_type == 0:
+                                curr_screen = 1
+                                start_screen(screen, button_group)
 
         # если игра началась, то отрисовываем спрайты
-        if start_game:
+        if curr_screen == 0:
             player_group.update(pygame.key.get_pressed(), wall_group=wall_group)
 
             camera.update(player)
             for sprite in all_sprites:
                 camera.apply(sprite)
 
+            screen.fill((0, 0, 0))
             # сначала отрисовываем тайлы
             tiles_group.draw(screen)
             # а уже затем игрока, иначе игрок может пропадать за тайлами
             player_group.draw(screen)
+
+        elif curr_screen == 1:
+            font = pygame.font.Font(None, 50)
+            for button in button_group:
+                pygame.draw.rect(screen, pygame.Color("white"), button.rect, 5)
+                string_rendered = font.render(button.text, 1, pygame.Color('white'))
+                text_rect = string_rendered.get_rect()
+                text_rect.y = button.pos_y + 20
+                text_rect.x = button.pos_x + 20
+                screen.blit(string_rendered, text_rect)
 
         pygame.display.flip()
         clock.tick(FPS)

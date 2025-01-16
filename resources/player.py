@@ -11,7 +11,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5)
         # шаг определяем как размер клетки
-        self.speed = 2
+        self.speed = 3
 
         # изначальное направление игрока (влево)
         self.image_left = self.image
