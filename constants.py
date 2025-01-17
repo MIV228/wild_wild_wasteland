@@ -1,10 +1,10 @@
-WIDTH = 1920
-HEIGHT = 1080
+WIDTH = 1600
+HEIGHT = 900
 
 FPS = 60
 
 TILE_IMAGES = {
-    'wall': 'box.png',
+    'wall': 'plank.png',
     'empty': 'grass.png'
 }
 

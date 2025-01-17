@@ -11,9 +11,6 @@ class Button:
         self.scale_y = scale_y
         self.function_type = function_type
         self.text = text
-        # шаг определяем как размер клетки
 
     def check_clicked(self, x, y) -> bool:
-        if self.pos_x >= x >= self.pos_x + self.scale_x and self.pos_y >= y >= self.pos_y + self.scale_y:
-            return True
-        return False
+        return self.rect.collidepoint(x, y)
