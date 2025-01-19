@@ -16,3 +16,9 @@ LEVEL_MAPS = {
 PLAYER_IMAGE = 'mar.png'
 
 TILE_WIDTH = TILE_HEIGHT = 100
+
+SPIN_RECTS = {
+    0: (WIDTH // 2 - 18, HEIGHT // 2 - 45, 8, 15),
+    1: (WIDTH // 2 - 5, HEIGHT // 2 - 45, 8, 15),
+    2: (WIDTH // 2 + 8, HEIGHT // 2 - 45, 8, 15)
+}

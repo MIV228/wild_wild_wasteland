@@ -5,7 +5,7 @@ import pygame
 from pygame import Surface
 
 
-def load_image(name, color_key=None) -> Surface:
+def load_image(name, scale_x=0, scale_y=0, color_key=None) -> Surface:
     fullname = os.path.join('data', name)
 
     # если файл не существует, то выходим
@@ -14,6 +14,8 @@ def load_image(name, color_key=None) -> Surface:
         sys.exit()
 
     image = pygame.image.load(fullname)
+    if scale_x != 0:
+        image = pygame.transform.scale(image, (scale_x, scale_y))
 
     if color_key is not None:
         image = image.convert()

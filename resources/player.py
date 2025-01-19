@@ -13,30 +13,40 @@ class Player(pygame.sprite.Sprite):
         # шаг определяем как размер клетки
         self.speed = 5
         self.spin_seconds = 0
+        self.max_health = 5
+        self.health = 5
 
         # изначальное направление игрока (влево)
         self.image_left = self.image
         self.image_right = pygame.transform.flip(self.image, True, False)
 
+    def shoot(self):
+
+        self.spin_seconds = 0
+
     def update(self, keys, mousebuttons, delta_time, wall_group) -> None:
-        # нужны для определения будущей позиции игрока
-        if 0 <= self.spin_seconds < 1:
+        # спин - вращение
+        # 0-0.5 сек - первый уровень (белый), 0.5-2 - 2 голубой, 2-4 - 3 золотой,
+        # 4-8 - 4 оранжевый, 8-14 - 5 красный
+        if 0 <= self.spin_seconds < 0.5:
             self.speed = 5
-        elif 1 <= self.spin_seconds < 2:
+        elif 0.5 <= self.spin_seconds < 2:
             self.speed = 6
-        elif 2 <= self.spin_seconds < 3:
+        elif 2 <= self.spin_seconds < 4:
             self.speed = 7
-        elif 3 <= self.spin_seconds < 5:
+        elif 4 <= self.spin_seconds < 8:
             self.speed = 8
         else:
-            self.speed = 10
+            self.speed = 7
 
         if mousebuttons[0]:
             self.spin_seconds += delta_time
+            if self.spin_seconds > 14:
+                self.shoot()
         else:
             if self.spin_seconds != 0:
                 self.spin_seconds = 0
-                pass
+                self.shoot()
 
         step_x = 0
         step_y = 0
