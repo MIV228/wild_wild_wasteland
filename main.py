@@ -21,6 +21,7 @@ def generate_level(level, tiles_group, player_group, wall_group, all_sprites):
         player_group.empty()
         wall_group.empty()
         all_sprites.empty()
+        projectiles.clear()
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -45,6 +46,7 @@ def draw_spin_rect(n, color):
         pygame.draw.rect(screen, color, SPIN_RECTS[1])
         pygame.draw.rect(screen, color, SPIN_RECTS[2])
 
+
 if __name__ == '__main__':
     pygame.init()
 
@@ -68,6 +70,7 @@ if __name__ == '__main__':
     tiles_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
     wall_group = pygame.sprite.Group()
+    projectiles = []
 
     # загружаем карту
     player, level_x, level_y = generate_level(load_level
@@ -83,7 +86,7 @@ if __name__ == '__main__':
     black_fade = 1
 
     running = True
-    curr_screen = 1 # 0 - игра, 1 - главное меню
+    curr_screen = 1  # 0 - игра, 1 - главное меню
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -117,8 +120,7 @@ if __name__ == '__main__':
         # если игра началась, то отрисовываем спрайты
         if curr_screen == 0:
             player_group.update(pygame.key.get_pressed(), pygame.mouse.get_pressed(), delta_time,
-                                wall_group=wall_group)
-
+                                wall_group=wall_group, screen=screen, projectiles=projectiles)
             if player:
                 camera.update(player)
                 for sprite in all_sprites:
@@ -127,6 +129,9 @@ if __name__ == '__main__':
             screen.fill((0, 0, 0))
             # сначала отрисовываем тайлы
             tiles_group.draw(screen)
+            if projectiles:
+                for p in projectiles:
+                    p.update()
             # а уже затем игрока, иначе игрок может пропадать за тайлами
             player_group.draw(screen)
 

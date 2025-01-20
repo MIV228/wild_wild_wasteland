@@ -8,6 +8,10 @@ TILE_IMAGES = {
     'empty': 'grass.png'
 }
 
+PROJECTILE_IMAGES = {
+    "bullet": "grass.png"
+}
+
 LEVEL_MAPS = {
     0: "map1.txt",
     1: "map2.txt"

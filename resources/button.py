@@ -3,7 +3,7 @@ from pygame import Surface
 from extensions import load_image
 
 
-class Button():
+class Button:
     def __init__(self, pos_x, pos_y, text, function_type, par=0):
         self.image = load_image('button.png')
         self.rect = self.image.get_rect().move(pos_x, pos_y)

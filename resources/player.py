@@ -2,6 +2,7 @@ import pygame
 
 from constants import PLAYER_IMAGE, TILE_WIDTH, TILE_HEIGHT
 from extensions import load_image
+from resources.projectile import Projectile
 
 
 class Player(pygame.sprite.Sprite):
@@ -20,11 +21,46 @@ class Player(pygame.sprite.Sprite):
         self.image_left = self.image
         self.image_right = pygame.transform.flip(self.image, True, False)
 
-    def shoot(self):
+    def shoot(self, screen, projectiles):
 
+        if 0 <= self.spin_seconds < 0.5:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                20, 20, 3, "bullet")
+            bullet.speed = 10
+            bullet.damage = 5
+            bullet.lifetime = 1
+        elif 0.5 <= self.spin_seconds < 2:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                            pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                            20, 20, 3, "bullet")
+        elif 2 <= self.spin_seconds < 4:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                20, 20, 3, "bullet")
+            bullet.speed = 40
+            bullet.damage = 40
+            if 3.8 <= self.spin_seconds < 4:
+                bullet.speed = 60
+                bullet.damage = 100
+        elif 4 <= self.spin_seconds < 8:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                20, 20, 3, "bullet")
+            bullet.speed = 30
+            bullet.damage = 60
+            bullet.lifetime = 5
+        else:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                20, 20, 3, "bullet")
+            bullet.speed = 5
+            bullet.damage = 80
+            bullet.lifetime = 10
+        projectiles.append(bullet)
         self.spin_seconds = 0
 
-    def update(self, keys, mousebuttons, delta_time, wall_group) -> None:
+    def update(self, keys, mousebuttons, delta_time, wall_group, screen, projectiles) -> None:
         # спин - вращение
         # 0-0.5 сек - первый уровень (белый), 0.5-2 - 2 голубой, 2-4 - 3 золотой,
         # 4-8 - 4 оранжевый, 8-14 - 5 красный
@@ -42,11 +78,11 @@ class Player(pygame.sprite.Sprite):
         if mousebuttons[0]:
             self.spin_seconds += delta_time
             if self.spin_seconds > 14:
-                self.shoot()
+                self.shoot(screen, projectiles)
         else:
             if self.spin_seconds != 0:
                 self.spin_seconds = 0
-                self.shoot()
+                self.shoot(screen, projectiles)
 
         step_x = 0
         step_y = 0
