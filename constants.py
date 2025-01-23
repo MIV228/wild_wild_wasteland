@@ -9,7 +9,10 @@ TILE_IMAGES = {
 }
 
 PROJECTILE_IMAGES = {
-    "bullet": "grass.png"
+    "ammo": "bullet.png",
+    "bullet": "bullet.png",
+    "steel_ball": "steel_ball.png",
+    "tornado": "plank.png"
 }
 
 LEVEL_MAPS = {
@@ -26,3 +29,5 @@ SPIN_RECTS = {
     1: (WIDTH // 2 - 5, HEIGHT // 2 - 45, 8, 15),
     2: (WIDTH // 2 + 8, HEIGHT // 2 - 45, 8, 15)
 }
+
+HEALTH_OFFSET = (30, 40)

@@ -16,73 +16,132 @@ class Player(pygame.sprite.Sprite):
         self.spin_seconds = 0
         self.max_health = 5
         self.health = 5
+        self.dead_timer = 2
+        self.ammo = 20
+        self.ammo_refill_cd = 5
 
         # изначальное направление игрока (влево)
         self.image_left = self.image
         self.image_right = pygame.transform.flip(self.image, True, False)
 
     def shoot(self, screen, projectiles):
+        if self.ammo <= 0: return
+        self.ammo -= 1
 
-        if 0 <= self.spin_seconds < 0.5:
+        if self.spin_seconds == 0:
+            return
+        if 0 < self.spin_seconds < 0.16:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                20, 20, 3, "bullet")
-            bullet.speed = 10
-            bullet.damage = 5
-            bullet.lifetime = 1
-        elif 0.5 <= self.spin_seconds < 2:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
-                            pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                            20, 20, 3, "bullet")
-        elif 2 <= self.spin_seconds < 4:
+                                10, 1, 0.8, "steel_ball", True)
+        elif 0.16 <= self.spin_seconds < 0.33:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                20, 20, 3, "bullet")
-            bullet.speed = 40
-            bullet.damage = 40
-            if 3.8 <= self.spin_seconds < 4:
-                bullet.speed = 60
-                bullet.damage = 100
-        elif 4 <= self.spin_seconds < 8:
+                                10, 3, 0.9, "steel_ball", True)
+        elif 0.33 <= self.spin_seconds < 0.5:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                20, 20, 3, "bullet")
-            bullet.speed = 30
-            bullet.damage = 60
-            bullet.lifetime = 5
+                                10, 5, 1, "steel_ball", True)
+
+        elif 0.5 <= self.spin_seconds < 1:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                15, 15, 2, "steel_ball", True)
+        elif 1 <= self.spin_seconds < 1.5:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                20, 20, 2, "steel_ball", True)
+        elif 1.5 <= self.spin_seconds < 2:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                25, 25, 2, "steel_ball", True)
+
+        elif 2 <= self.spin_seconds < 2.9:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                35, 30, 1, "steel_ball", True)
+        elif 2.9 <= self.spin_seconds < 3.8:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                45, 40, 1, "steel_ball", True)
+        elif 3.8 <= self.spin_seconds < 4:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                60, 100, 1, "steel_ball", True, True)
+
+        elif 4 <= self.spin_seconds < 5.33:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                45, 50, 1, "steel_ball", True, True)
+        elif 5.33 <= self.spin_seconds < 6.66:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                40, 60, 1, "steel_ball", True, True)
+        elif 6.66 <= self.spin_seconds < 8:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                35, 70, 1, "steel_ball", True, True)
+
+        elif 8 <= self.spin_seconds < 10:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                30, 75, 5, "tornado", True, True)
+        elif 10 <= self.spin_seconds < 12:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                20, 80, 5, "tornado", True, True)
+        elif 12 <= self.spin_seconds < 14:
+            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                                pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                10, 85, 5, "tornado", True, True)
         else:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                20, 20, 3, "bullet")
-            bullet.speed = 5
-            bullet.damage = 80
-            bullet.lifetime = 10
+                                20, 90, 5, "tornado", True, True)
         projectiles.append(bullet)
         self.spin_seconds = 0
 
-    def update(self, keys, mousebuttons, delta_time, wall_group, screen, projectiles) -> None:
-        # спин - вращение
-        # 0-0.5 сек - первый уровень (белый), 0.5-2 - 2 голубой, 2-4 - 3 золотой,
-        # 4-8 - 4 оранжевый, 8-14 - 5 красный
-        if 0 <= self.spin_seconds < 0.5:
-            self.speed = 5
-        elif 0.5 <= self.spin_seconds < 2:
-            self.speed = 6
-        elif 2 <= self.spin_seconds < 4:
-            self.speed = 7
-        elif 4 <= self.spin_seconds < 8:
-            self.speed = 8
-        else:
-            self.speed = 7
+    def hurt(self, damage):
+        self.health -= damage
 
-        if mousebuttons[0]:
-            self.spin_seconds += delta_time
-            if self.spin_seconds > 14:
-                self.shoot(screen, projectiles)
+        if self.health <= 0:
+            self.image = pygame.transform.scale_by(load_image("box.png"), 4)
+
+    def update(self, keys, mousebuttons, delta_time, wall_group,
+               screen:pygame.Surface, projectiles) -> None:
+        if self.health <= 0:
+            self.dead_timer -= delta_time
+            return
+
+        if self.ammo > 0:
+            self.ammo_refill_cd = 5
+            # спин - вращение
+            # 0-0.5 сек - первый уровень (белый), 0.5-2 - 2 голубой, 2-4 - 3 золотой,
+            # 4-8 - 4 оранжевый, 8-14 - 5 красный
+            if 0 <= self.spin_seconds < 0.5:
+                self.speed = 5
+            elif 0.5 <= self.spin_seconds < 2:
+                self.speed = 6
+            elif 2 <= self.spin_seconds < 4:
+                self.speed = 7
+            elif 4 <= self.spin_seconds < 8:
+                self.speed = 8
+            else:
+                self.speed = 7
+
+            if mousebuttons[0]:
+                self.spin_seconds += delta_time
+                if self.spin_seconds > 14:
+                    self.shoot(screen, projectiles)
+            else:
+                if self.spin_seconds != 0:
+                    self.shoot(screen, projectiles)
         else:
-            if self.spin_seconds != 0:
-                self.spin_seconds = 0
-                self.shoot(screen, projectiles)
+            self.ammo_refill_cd -= delta_time
+            if self.ammo_refill_cd <= 0:
+                self.ammo += 1
+                self.ammo_refill_cd = 5
+            self.speed = 5
 
         step_x = 0
         step_y = 0
@@ -98,10 +157,23 @@ class Player(pygame.sprite.Sprite):
             step_y += self.speed
 
         # будущая позиция игрока
-        next_rect = self.rect.move(step_x, step_y)
+        apply_x = True
+        next_rect_h = self.rect.move(step_x, 0)
         # перебираем все спрайты стен и проверяем, есть ли столкновение
         for wall in wall_group:
-            if next_rect.colliderect(wall.rect):
-                return
+            if next_rect_h.colliderect(wall.rect):
+                apply_x = False
+                break
 
-        self.rect = next_rect
+        apply_y = True
+        next_rect_v = self.rect.move(0, step_y)
+        # перебираем все спрайты стен и проверяем, есть ли столкновение
+        for wall in wall_group:
+            if next_rect_v.colliderect(wall.rect):
+                apply_y = False
+                break
+
+        self.rect = self.rect.move(step_x if apply_x else 0, step_y if apply_y else 0)
+        for p in projectiles:
+            if apply_x: p.x -= step_x
+            if apply_y: p.y -= step_y
