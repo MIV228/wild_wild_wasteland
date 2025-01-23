@@ -59,45 +59,45 @@ class Player(pygame.sprite.Sprite):
         elif 2 <= self.spin_seconds < 2.9:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                35, 30, 1, "steel_ball", True)
+                                35, 30, 0.7, "steel_ball", True, True)
         elif 2.9 <= self.spin_seconds < 3.8:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                45, 40, 1, "steel_ball", True)
+                                45, 40, 0.6, "steel_ball", True, True)
         elif 3.8 <= self.spin_seconds < 4:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                60, 100, 1, "steel_ball", True, True)
+                                60, 100, 0.2, "steel_ball", True, True)
 
         elif 4 <= self.spin_seconds < 5.33:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                45, 50, 1, "steel_ball", True, True)
+                                45, 50, 0.3, "steel_ball", True, True)
         elif 5.33 <= self.spin_seconds < 6.66:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                40, 60, 1, "steel_ball", True, True)
+                                40, 60, 0.4, "steel_ball", True, True)
         elif 6.66 <= self.spin_seconds < 8:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                35, 70, 1, "steel_ball", True, True)
+                                35, 70, 0.4, "steel_ball", True, True)
 
         elif 8 <= self.spin_seconds < 10:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                30, 75, 5, "tornado", True, True)
+                                30, 75, 3, "tornado", True, True)
         elif 10 <= self.spin_seconds < 12:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                20, 80, 5, "tornado", True, True)
+                                20, 80, 3, "tornado", True, True)
         elif 12 <= self.spin_seconds < 14:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                10, 85, 5, "tornado", True, True)
+                                10, 85, 3, "tornado", True, True)
         else:
             bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                20, 90, 5, "tornado", True, True)
+                                20, 90, 3, "tornado", True, True)
         projectiles.append(bullet)
         self.spin_seconds = 0
 
@@ -124,10 +124,8 @@ class Player(pygame.sprite.Sprite):
                 self.speed = 6
             elif 2 <= self.spin_seconds < 4:
                 self.speed = 7
-            elif 4 <= self.spin_seconds < 8:
-                self.speed = 8
             else:
-                self.speed = 7
+                self.speed = 8
 
             if mousebuttons[0]:
                 self.spin_seconds += delta_time

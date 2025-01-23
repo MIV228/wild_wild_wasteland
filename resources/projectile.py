@@ -7,7 +7,7 @@ from extensions import load_image
 class Projectile:
     def __init__(self, screen, x, y, mouse_x, mouse_y, speed, damage, lifetime, p_type,
                  player_friendly=False, piercing=False, additional_angle=0):
-        self.angle = math.atan2(y - mouse_y, x - mouse_x) + additional_angle
+        self.angle = math.atan2(y - mouse_y, x - mouse_x) + (additional_angle / 20)
         self.image = load_image(PROJECTILE_IMAGES[p_type])
         self.image = pygame.transform.scale_by(self.image, 4)
         self.image = pygame.transform.rotate(self.image, self.angle * 1.275 * -45)

@@ -8,7 +8,7 @@ from resources.camera import Camera
 from screens import start_screen
 from resources.player import Player
 from resources.tile import Tile
-from resources.enemies import GunEnemy, Box
+from resources.enemies import GunEnemy, Box, ShotgunEnemy
 
 
 def terminate():
@@ -42,7 +42,15 @@ def generate_level(level, tiles_group, player_group, enemy_group, dead_enemies, 
                         Tile('wall', x, y, tiles_group, wall_group, all_sprites)
                     elif level[y + 1][x] != "#":
                         Tile('wall', x, y, tiles_group, wall_group, all_sprites)
+                    elif level[y + 1][x - 1] != "#":
+                        Tile('wall', x, y, tiles_group, wall_group, all_sprites)
+                    elif level[y + 1][x + 1] != "#":
+                        Tile('wall', x, y, tiles_group, wall_group, all_sprites)
                     elif level[y - 1][x] != "#":
+                        Tile('wall', x, y, tiles_group, wall_group, all_sprites)
+                    elif level[y - 1][x - 1] != "#":
+                        Tile('wall', x, y, tiles_group, wall_group, all_sprites)
+                    elif level[y - 1][x + 1] != "#":
                         Tile('wall', x, y, tiles_group, wall_group, all_sprites)
                     else:
                         Tile('wall', x, y, tiles_group, all_sprites)
@@ -51,12 +59,15 @@ def generate_level(level, tiles_group, player_group, enemy_group, dead_enemies, 
             elif level[y][x] == '@':
                 Tile('empty', x, y, tiles_group, all_sprites)
                 new_player = Player(x, y, player_group, all_sprites)
-            elif level[y][x] == '*':
+            elif level[y][x] == 'E':
                 Tile('empty', x, y, tiles_group, all_sprites)
                 GunEnemy(x, y, enemy_group, all_sprites)
             elif level[y][x] == '+':
                 Tile('empty', x, y, tiles_group, all_sprites)
                 Box(x, y, enemy_group, wall_group, all_sprites)
+            elif level[y][x] == 'S':
+                Tile('empty', x, y, tiles_group, all_sprites)
+                ShotgunEnemy(x, y, enemy_group, all_sprites)
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
 
