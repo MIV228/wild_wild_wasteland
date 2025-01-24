@@ -4,7 +4,8 @@ HEIGHT = 900
 FPS = 60
 
 TILE_IMAGES = {
-    'wall': 'plank.png',
+    'sand_wall': 'sand_wall.png',
+    'plank': 'plank.png',
     'empty': 'grass.png'
 }
 
@@ -12,7 +13,8 @@ PROJECTILE_IMAGES = {
     "ammo": "bullet.png",
     "bullet": "bullet.png",
     "steel_ball": "steel_ball.png",
-    "tornado": "plank.png"
+    "tornado": "plank.png",
+    "spike": "spike.png"
 }
 
 LEVEL_MAPS = {

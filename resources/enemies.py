@@ -6,10 +6,11 @@ from constants import PLAYER_IMAGE, TILE_WIDTH, TILE_HEIGHT
 from extensions import load_image
 from resources.projectile import Projectile
 from resources.pickups import Pickup
+from resources.particles import create_particles
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, pos_x, pos_y, image, dead_image, *groups):
+    def __init__(self, pos_x, pos_y, particle_group, image, dead_image, *groups):
         super().__init__(*groups)
         self.image = load_image(image)
         self.rect = self.image.get_rect().move(
@@ -27,6 +28,7 @@ class Enemy(pygame.sprite.Sprite):
 
         self.dead_image = load_image(dead_image)
         self.is_dead = False
+        self.p_groups = [particle_group, groups[-1]]
 
     def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
         if self.is_dead: return
@@ -44,6 +46,8 @@ class Enemy(pygame.sprite.Sprite):
             self.image = self.dead_image
             self.is_dead = True
 
+        create_particles((self.rect.centerx, self.rect.centery), "blood.png", 40, *self.p_groups)
+
     def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
         if self.is_dead: return
 
@@ -55,8 +59,8 @@ class Enemy(pygame.sprite.Sprite):
 
 
 class GunEnemy(Enemy):
-    def __init__(self, pos_x, pos_y, *groups):
-        super().__init__(pos_x, pos_y, PLAYER_IMAGE, "button.png", *groups)
+    def __init__(self, pos_x, pos_y, particle_group, *groups):
+        super().__init__(pos_x, pos_y, particle_group, PLAYER_IMAGE, "button.png", *groups)
 
         self.ammo = 6
 
@@ -130,8 +134,8 @@ class GunEnemy(Enemy):
 
 
 class ShotgunEnemy(Enemy):
-    def __init__(self, pos_x, pos_y, *groups):
-        super().__init__(pos_x, pos_y, "player_idle.png", "button.png", *groups)
+    def __init__(self, pos_x, pos_y, particle_group, *groups):
+        super().__init__(pos_x, pos_y, particle_group, "player_idle.png", "button.png", *groups)
 
         self.health = 50
         self.speed = 3
@@ -145,7 +149,7 @@ class ShotgunEnemy(Enemy):
         for i in range(5):
             projectiles.append(Projectile(screen, self.rect.x - 10, self.rect.y,
                                           player_pos_x, player_pos_y,
-                                          25, 1, 3, "bullet", additional_angle=(i - 2) * 2))
+                                          25, 1, 3, "bullet", additional_angle=(i - 2) * 5))
         self.shoot_cd = 2
 
     def hurt(self, damage):
@@ -196,8 +200,8 @@ class ShotgunEnemy(Enemy):
 
 
 class Box(Enemy):
-    def __init__(self, pos_x, pos_y, *groups):
-        super().__init__(pos_x, pos_y, "box.png", "grass.png", *groups)
+    def __init__(self, pos_x, pos_y, particle_group, *groups):
+        super().__init__(pos_x, pos_y, particle_group, "box.png", "grass.png", *groups)
         self.image = pygame.transform.scale_by(self.image, 4)
         self.rect = self.image.get_rect().move(
             TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
@@ -225,8 +229,74 @@ class Box(Enemy):
             self.pickups.append(Pickup(self.screen, self.rect.centerx, self.rect.centery,
                                        random.randint(0, 360), "ammo.png"))
 
+        create_particles((self.rect.centerx, self.rect.centery), "box_chip.png", 20, *self.p_groups)
+
     def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
         if not self.is_dead:
             self.player = player
             self.pickups = kwargs['pickups']
+            self.screen = screen
+
+
+class Cactus(Enemy):
+    def __init__(self, pos_x, pos_y, particle_group, *groups):
+        super().__init__(pos_x, pos_y, particle_group, "cactus.png", "grass.png", *groups)
+        self.image = pygame.transform.scale_by(self.image, 4)
+        self.rect = self.image.get_rect().move(
+            TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
+        # шаг определяем как размер клетки
+        self.health = 1
+
+        self.player = None
+        self.proj = None
+        self.screen = None
+        self.wall_group = groups[1]
+
+    def hurt(self, damage):
+        if self.is_dead: return
+
+        self.health -= 1
+        self.image = self.dead_image
+        self.is_dead = True
+        self.kill()
+
+        for i in range(12):
+            self.proj.append(Projectile(self.screen, self.rect.centerx, self.rect.centery, self.rect.centerx + 10, self.rect.centery,
+                                       25, 30, 3, "spike", player_friendly=True, additional_angle=i * 30))
+
+        create_particles((self.rect.centerx, self.rect.centery), "cactus_chip.png", 30, *self.p_groups)
+
+    def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
+        if not self.is_dead:
+            self.player = player
+            self.proj = projectiles
+            self.screen = screen
+
+
+class Plank(Enemy):
+    def __init__(self, pos_x, pos_y, particle_group, *groups):
+        super().__init__(pos_x, pos_y, particle_group, "plank.png", "grass.png", *groups)
+        self.image = pygame.transform.scale_by(self.image, 4)
+        self.rect = self.image.get_rect().move(
+            TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
+        # шаг определяем как размер клетки
+        self.health = 1
+
+        self.player = None
+        self.screen = None
+        self.wall_group = groups[1]
+
+    def hurt(self, damage):
+        if self.is_dead: return
+
+        self.health -= 1
+        self.image = self.dead_image
+        self.is_dead = True
+        self.kill()
+
+        create_particles((self.rect.centerx, self.rect.centery), "chip.png", 20, *self.p_groups)
+
+    def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
+        if not self.is_dead:
+            self.player = player
             self.screen = screen
