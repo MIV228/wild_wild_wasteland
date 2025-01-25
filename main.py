@@ -123,15 +123,7 @@ if __name__ == '__main__':
     pickups = []
 
     # загружаем карту
-    player, level_x, level_y = generate_level(load_level
-                                              (LEVEL_MAPS[0]),
-                                              tiles_group,
-                                              player_group,
-                                              enemy_group,
-                                              dead_enemies,
-                                              wall_group,
-                                              particle_group,
-                                              all_sprites)
+    player, level_x, level_y = None, None, None
 
     delta_time = 0
 

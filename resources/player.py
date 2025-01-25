@@ -112,7 +112,7 @@ class Player(pygame.sprite.Sprite):
         for i in range(5):
             projectiles.append(Projectile(screen, self.rect.x - 10, self.rect.y,
                                           pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                          35, 15, 3, "bullet", additional_angle=(i - 2) * 4,
+                                          40, 15, 3, "bullet", additional_angle=(i - 2) * 3,
                                           player_friendly=True, piercing=True))
         self.shoot_cd = 1
 

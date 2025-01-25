@@ -10,7 +10,7 @@ TILE_IMAGES = {
 }
 
 PROJECTILE_IMAGES = {
-    "ammo": "bullet.png",
+    "ammo": "ammo.png",
     "bullet": "bullet.png",
     "steel_ball": "steel_ball.png",
     "tornado": "plank.png",
@@ -18,8 +18,9 @@ PROJECTILE_IMAGES = {
 }
 
 LEVEL_MAPS = {
-    0: "map1.txt",
-    1: "map2.txt"
+    0: "tutorial.txt",
+    1: "map1.txt",
+    2: "map2.txt"
 }
 
 PLAYER_IMAGE = 'mar.png'

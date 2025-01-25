@@ -26,8 +26,8 @@ def start_screen(screen: Surface, button_group) -> None:
     b_start_game = Button(64, 360, "play", 2, 2)
     b_quit = Button(64, 450, "quit", 1)
 
-    b_level1 = Button(64, 360, "gunpowder canyon", 0, 0)
-    b_level2 = Button(64, 450, "metal marshes", 0, 1)
+    b_level1 = Button(64, 360, "gunpowder canyon", 0, 1)
+    b_level2 = Button(64, 450, "metal marshes", 0, 2)
     b_level_back = Button(64, 620, "back", 2, 1)
 
     button_group.append([b_start_game, b_quit])
