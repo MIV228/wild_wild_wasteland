@@ -96,7 +96,7 @@ class GunEnemy(Enemy):
             if self.shoot_cd <= 0:
                 self.shoot(screen, projectiles, player.rect.centerx, player.rect.centery)
                 if self.ammo == 0:
-                    self.shoot_cd = 3
+                    self.shoot_cd = random.choice([2.2 + x * 0.2 for x in range(0, 8)])
 
         step_x = self.vel_x
         step_y = self.vel_y
@@ -150,7 +150,7 @@ class ShotgunEnemy(Enemy):
             projectiles.append(Projectile(screen, self.rect.x - 10, self.rect.y,
                                           player_pos_x, player_pos_y,
                                           25, 1, 3, "bullet", additional_angle=(i - 2) * 5))
-        self.shoot_cd = 2
+        self.shoot_cd = 1.6
 
     def hurt(self, damage):
         super().hurt(damage)
@@ -174,9 +174,83 @@ class ShotgunEnemy(Enemy):
                 self.vel_x = 0
                 self.move_cd = 2
             else:
-                self.vel_x = random.choice((-4, 0, 4))
-                self.vel_y = random.choice((-4, 0, 4))
+                self.vel_x = random.choice((-self.speed, 0, self.speed))
+                self.vel_y = random.choice((-self.speed, 0, self.speed))
                 self.move_cd = random.choice((1, 1.2, 1.5, 2))
+
+        if self.vel_x == 0 and self.vel_y == 0: return
+
+        apply_x = True
+        next_rect_h = self.rect.move(step_x, 0)
+        # перебираем все спрайты стен и проверяем, есть ли столкновение
+        for wall in wall_group:
+            if next_rect_h.colliderect(wall.rect):
+                apply_x = False
+                break
+
+        apply_y = True
+        next_rect_v = self.rect.move(0, step_y)
+        # перебираем все спрайты стен и проверяем, есть ли столкновение
+        for wall in wall_group:
+            if next_rect_v.colliderect(wall.rect):
+                apply_y = False
+                break
+
+        self.rect = self.rect.move(step_x if apply_x else 0, step_y if apply_y else 0)
+
+
+class MinigunEnemy(Enemy):
+    def __init__(self, pos_x, pos_y, particle_group, *groups):
+        super().__init__(pos_x, pos_y, particle_group, PLAYER_IMAGE, "button.png", *groups)
+
+        self.ammo = 50
+        self.health = 100
+        self.speed = 1
+
+        self.image_left = self.image
+        self.image_right = pygame.transform.flip(self.image, True, False)
+
+    def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
+        if self.is_dead:
+            return
+        bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+                            player_pos_x, player_pos_y,
+                            25, 1, 3, "bullet",
+                            additional_angle=random.choice([x for x in range(-5, 5)]))
+        projectiles.append(bullet)
+        self.shoot_cd = 0.15
+        self.ammo -= 1
+
+    def reload(self):
+        self.ammo = 50
+
+    def hurt(self, damage):
+        super().hurt(damage)
+
+    def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
+        super().update(delta_time, wall_group, screen, projectiles, player)
+
+        if not self.saw_player: return
+
+        self.shoot_cd -= delta_time
+        if self.ammo <= 0:
+            if self.shoot_cd <= 0:
+                self.reload()
+        else:
+            self.shoot_cd -= delta_time
+            if self.shoot_cd <= 0:
+                self.shoot(screen, projectiles, player.rect.centerx, player.rect.centery)
+                if self.ammo == 0:
+                    self.shoot_cd = 7
+
+        step_x = self.vel_x
+        step_y = self.vel_y
+
+        self.move_cd -= delta_time
+        if self.move_cd <= 0:
+            self.vel_x = random.choice((-self.speed, self.speed))
+            self.vel_y = random.choice((-self.speed, self.speed))
+            self.move_cd = random.choice((0.8, 1, 1.2, 1.5, 1.7))
 
         if self.vel_x == 0 and self.vel_y == 0: return
 
@@ -212,6 +286,8 @@ class Box(Enemy):
         self.pickups = None
         self.screen = None
         self.wall_group = groups[1]
+
+        self.dollars = 4
 
     def hurt(self, damage):
         if self.is_dead: return
@@ -252,6 +328,8 @@ class Cactus(Enemy):
         self.screen = None
         self.wall_group = groups[1]
 
+        self.dollars = 0
+
     def hurt(self, damage):
         if self.is_dead: return
 
@@ -285,6 +363,8 @@ class Plank(Enemy):
         self.player = None
         self.screen = None
         self.wall_group = groups[1]
+
+        self.dollars = 1
 
     def hurt(self, damage):
         if self.is_dead: return

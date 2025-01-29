@@ -5,6 +5,14 @@ FPS = 60
 
 TILE_IMAGES = {
     'sand_wall': 'sand_wall.png',
+    'sand_wall1': 'sand_wall1.png',
+    'sand_wall2': 'sand_wall2.png',
+    'sand_wall3': 'sand_wall3.png',
+    'sand_wall4': 'sand_wall4.png',
+    'sand_wall5': 'sand_wall5.png',
+    'sand_wall6': 'sand_wall6.png',
+    'sand_wall7': 'sand_wall7.png',
+    'sand_wall8': 'sand_wall8.png',
     'plank': 'plank.png',
     'empty': 'grass.png'
 }
@@ -19,8 +27,7 @@ PROJECTILE_IMAGES = {
 
 LEVEL_MAPS = {
     0: "tutorial.txt",
-    1: "map1.txt",
-    2: "map2.txt"
+    1: "map1.txt"
 }
 
 PLAYER_IMAGE = 'mar.png'

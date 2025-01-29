@@ -39,13 +39,14 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '#'), level_map))
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, sheet, columns, rows, x, y, all_sprites):
-        super().__init__(all_sprites)
+    def __init__(self, sheet, columns, rows, x, y, *groups):
+        super().__init__(*groups)
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(x, y)
+        self.update_cd = 0
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
@@ -56,6 +57,27 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 self.frames.append(sheet.subsurface(pygame.Rect(
                     frame_location, self.rect.size)))
 
-    def update(self):
-        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-        self.image = self.frames[self.cur_frame]
+    def update(self) -> bool:
+        self.update_cd += 1
+        if self.update_cd >= 10:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+            self.update_cd = 0
+            return True
+        return False
+
+    def reset(self):
+        self.update_cd = 0
+        self.cur_frame = 0
+
+def get_sheet_image(x, y, width, height, sprite_sheet, color_key=None):
+    image = pygame.Surface.subsurface(sprite_sheet, (x, y, width, height))
+    if color_key is not None:
+        image = image.convert()
+        if color_key == -1:
+            color_key = image.get_at((0, 0))
+        image.set_colorkey(color_key)
+    else:
+        image = image.convert_alpha()
+
+    return image

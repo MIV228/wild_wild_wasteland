@@ -1,8 +1,7 @@
 import pygame
 import math
-from constants import PROJECTILE_IMAGES
+from constants import PROJECTILE_IMAGES, WIDTH, HEIGHT
 from extensions import load_image
-
 
 class Projectile:
     def __init__(self, screen, x, y, mouse_x, mouse_y, speed, damage, lifetime, p_type,
@@ -11,11 +10,11 @@ class Projectile:
         self.image = load_image(PROJECTILE_IMAGES[p_type])
         self.image = pygame.transform.scale_by(self.image, 4)
         self.image = pygame.transform.rotate(self.image, self.angle * 1.275 * -45)
-        self.rect = self.image.get_rect().move(x, y)
         self.damage = damage
         self.lifetime = lifetime
-        self.x = x
-        self.y = y
+        self.x = x - self.image.get_width()
+        self.y = y - self.image.get_height()
+        self.rect = self.image.get_rect().move(x, y)
         self.speed = speed
         self.vel_x = math.cos(self.angle) * self.speed
         self.vel_y = math.sin(self.angle) * self.speed

@@ -1,3 +1,4 @@
+import random
 import sys
 
 import pygame
@@ -8,7 +9,8 @@ from resources.camera import Camera
 from screens import start_screen
 from resources.player import Player
 from resources.tile import Tile
-from resources.enemies import GunEnemy, Box, ShotgunEnemy, Cactus, Plank
+from resources.enemies import GunEnemy, Box, ShotgunEnemy, Cactus, Plank, MinigunEnemy
+from resources.sign import Sign
 
 
 def terminate():
@@ -16,8 +18,9 @@ def terminate():
     sys.exit()
 
 
-def generate_level(level, tiles_group, player_group, enemy_group, dead_enemies, wall_group,
-                   particle_group, all_sprites, *delete_groups):
+def generate_level(level, *delete_groups):
+    global kills, level_time, tiles_group, player_group, enemy_group, dead_enemies, curr_level, sign_group,\
+        wall_group, particle_group, level_objective_group, all_sprites, property_damage, total_dollars, level_end_group
     if tiles_group:
         tiles_group.empty()
         player_group.empty()
@@ -28,58 +31,158 @@ def generate_level(level, tiles_group, player_group, enemy_group, dead_enemies, 
         enemy_group.empty()
         dead_enemies.empty()
         particle_group.empty()
+        level_objective_group.empty()
+        level_end_group.empty()
+        sign_group.empty()
         if delete_groups:
             for g in delete_groups:
                 g.empty()
+        kills = 0
+        level_time = 0
+        property_damage = 0
+        total_dollars = 0
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
-            if level[y][x] == '.':
-                Tile('empty', x, y, tiles_group, all_sprites)
-            elif level[y][x] == '#':
-                if x != 0 and x != len(level[0]) - 1 and y != 0 and y != len(level) - 1:
-                    if level[y][x + 1] != "#":
-                        Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
-                    elif level[y][x - 1] != "#":
-                        Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
-                    elif level[y + 1][x] != "#":
-                        Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
-                    elif level[y + 1][x - 1] != "#":
-                        Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
-                    elif level[y + 1][x + 1] != "#":
-                        Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
-                    elif level[y - 1][x] != "#":
-                        Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
-                    elif level[y - 1][x - 1] != "#":
-                        Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
-                    elif level[y - 1][x + 1] != "#":
-                        Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+            if curr_level == 0:
+                if level[y][x] == '.':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                elif level[y][x] == '#':
+                    if x != 0 and x != len(level[0]) - 1 and y != 0 and y != len(level) - 1:
+                        if level[y][x + 1] != "#":
+                            if level[y - 1][x] != "#":
+                                Tile('sand_wall3', x, y, tiles_group, wall_group, all_sprites)
+                            elif level[y + 1][x] != "#":
+                                Tile('sand_wall5', x, y, tiles_group, wall_group, all_sprites)
+                            else:
+                                Tile('sand_wall4', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y][x - 1] != "#":
+                            if level[y - 1][x] != "#":
+                                Tile('sand_wall1', x, y, tiles_group, wall_group, all_sprites)
+                            elif level[y + 1][x] != "#":
+                                Tile('sand_wall7', x, y, tiles_group, wall_group, all_sprites)
+                            else:
+                                Tile('sand_wall8', x, y, tiles_group, wall_group, all_sprites)
+                            # сверху - снизу
+                        elif level[y - 1][x] != "#":
+                            Tile('sand_wall2', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y + 1][x] != "#":
+                            Tile('sand_wall6', x, y, tiles_group, wall_group, all_sprites)
+                            # по диагонали
+                        elif level[y + 1][x - 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y + 1][x + 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y - 1][x - 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y - 1][x + 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        else:
+                            Tile('sand_wall', x, y, tiles_group, all_sprites)
                     else:
                         Tile('sand_wall', x, y, tiles_group, all_sprites)
-                else:
-                    Tile('sand_wall', x, y, tiles_group, all_sprites)
-            elif level[y][x] == '@':
-                Tile('empty', x, y, tiles_group, all_sprites)
-                new_player = Player(x, y, particle_group, player_group, all_sprites)
-            elif level[y][x] == 'E':
-                Tile('empty', x, y, tiles_group, all_sprites)
-                GunEnemy(x, y, particle_group, enemy_group, all_sprites)
-            elif level[y][x] == '+':
-                Tile('empty', x, y, tiles_group, all_sprites)
-                Box(x, y, particle_group, enemy_group, wall_group, all_sprites)
-            elif level[y][x] == 'S':
-                Tile('empty', x, y, tiles_group, all_sprites)
-                ShotgunEnemy(x, y, particle_group, enemy_group, all_sprites)
-            elif level[y][x] == '*':
-                Tile('empty', x, y, tiles_group, all_sprites)
-                Cactus(x, y - 1, particle_group, enemy_group, wall_group, all_sprites)
-            elif level[y][x] == "=":
-                Tile('empty', x, y, tiles_group, all_sprites)
-                Plank(x, y, particle_group, enemy_group, wall_group, all_sprites)
-            elif level[y][x] == "]":
-                Tile('empty', x, y, tiles_group, wall_group, all_sprites)
+                elif level[y][x] == '@':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    new_player = Player(x, y, particle_group, player_group, all_sprites)
+                elif level[y][x] == '+':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Box(x, y, particle_group, enemy_group, wall_group, all_sprites)
+                elif level[y][x] == '*':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Cactus(x, y - 1, particle_group, enemy_group, wall_group, all_sprites)
+                elif level[y][x] == "=":
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Plank(x, y, particle_group, enemy_group, wall_group, all_sprites)
+                elif level[y][x] == "]":
+                    Tile('empty', x, y, tiles_group, level_objective_group, wall_group, all_sprites)
+                elif level[y][x] == "[":
+                    Tile('empty', x, y, tiles_group, level_end_group, all_sprites)
+                elif level[y][x] == "0":
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Sign(x, y, "use WASD to move", sign_group, all_sprites)
+                elif level[y][x] == "1":
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Sign(x, y, "hold [LMB] to spin the ball, release to shoot it", sign_group, all_sprites)
+                elif level[y][x] == "2":
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Sign(x, y, "balls with perfect rotation deal double damage", sign_group, all_sprites)
+                elif level[y][x] == "3":
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Sign(x, y, "press [RMB] to quickdraw a shotgun blast", sign_group, all_sprites)
+                elif level[y][x] == "4":
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Sign(x, y, "most things here explode when deformed", sign_group, all_sprites)
+                elif level[y][x] == "5":
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Sign(x, y, "destroy strongholds to get $20000 extra", sign_group, all_sprites)
+            else:
+                if level[y][x] == '.':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                elif level[y][x] == '#':
+                    if x != 0 and x != len(level[0]) - 1 and y != 0 and y != len(level) - 1:
+                        if level[y][x + 1] != "#":
+                            if level[y - 1][x] != "#":
+                                Tile('sand_wall3', x, y, tiles_group, wall_group, all_sprites)
+                            elif level[y + 1][x] != "#":
+                                Tile('sand_wall5', x, y, tiles_group, wall_group, all_sprites)
+                            else:
+                                Tile('sand_wall4', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y][x - 1] != "#":
+                            if level[y - 1][x] != "#":
+                                Tile('sand_wall1', x, y, tiles_group, wall_group, all_sprites)
+                            elif level[y + 1][x] != "#":
+                                Tile('sand_wall7', x, y, tiles_group, wall_group, all_sprites)
+                            else:
+                                Tile('sand_wall8', x, y, tiles_group, wall_group, all_sprites)
+                            # сверху - снизу
+                        elif level[y - 1][x] != "#":
+                            Tile('sand_wall2', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y + 1][x] != "#":
+                            Tile('sand_wall6', x, y, tiles_group, wall_group, all_sprites)
+                            # по диагонали
+                        elif level[y + 1][x - 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y + 1][x + 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y - 1][x - 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y - 1][x + 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        else:
+                            Tile('sand_wall', x, y, tiles_group, all_sprites)
+                    else:
+                        Tile('sand_wall', x, y, tiles_group, all_sprites)
+                elif level[y][x] == '@':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    new_player = Player(x, y, particle_group, player_group, all_sprites)
+                elif level[y][x] == 'E':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    GunEnemy(x, y, particle_group, enemy_group, all_sprites)
+                elif level[y][x] == '+':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Box(x, y, particle_group, enemy_group, wall_group, all_sprites)
+                elif level[y][x] == '!':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Box(x, y, particle_group, enemy_group, level_objective_group, wall_group, all_sprites)
+                elif level[y][x] == 'S':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    ShotgunEnemy(x, y, particle_group, enemy_group, all_sprites)
+                elif level[y][x] == 'M':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    MinigunEnemy(x, y, particle_group, enemy_group, all_sprites)
+                elif level[y][x] == '*':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Cactus(x, y - 1, particle_group, enemy_group, wall_group, all_sprites)
+                elif level[y][x] == "=":
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Plank(x, y, particle_group, enemy_group, wall_group, all_sprites)
+                elif level[y][x] == "]":
+                    Tile('empty', x, y, tiles_group, wall_group, all_sprites)
+                elif level[y][x] == "[":
+                    Tile('empty', x, y, tiles_group, level_end_group, all_sprites)
     # вернем игрока, а также размер поля в клетках
     return new_player, x, y
+
 
 def draw_spin_rect(n, color):
     if n == 0:
@@ -94,10 +197,11 @@ def draw_spin_rect(n, color):
 
 
 if __name__ == '__main__':
+    pygame.mixer.pre_init(44100, -16, 1, 512)
     pygame.init()
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
-    #screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    #screen = pygame.display.set_mode((1200, 675))
     pygame.display.set_caption("Wild Wild Wasteland")
 
     clock = pygame.time.Clock()
@@ -111,7 +215,6 @@ if __name__ == '__main__':
     camera = Camera()
 
     # группы спрайтов
-
     all_sprites = pygame.sprite.Group()
     tiles_group = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
@@ -119,8 +222,20 @@ if __name__ == '__main__':
     enemy_group = pygame.sprite.Group()
     dead_enemies = pygame.sprite.Group()
     particle_group = pygame.sprite.Group()
+    level_objective_group = pygame.sprite.Group()
+    level_end_group = pygame.sprite.Group()
+
+    sign_group = pygame.sprite.Group()
+
     projectiles = []
     pickups = []
+
+    kills = 0
+    kill_bonus = 0
+    level_time = 0
+    property_damage = 0
+    total_dollars = 0
+    curr_level = 0
 
     # загружаем карту
     player, level_x, level_y = None, None, None
@@ -133,6 +248,7 @@ if __name__ == '__main__':
     heart_image = pygame.transform.scale_by(load_image("heart.png"), 2)
     ammo_image = pygame.transform.scale_by(load_image("ammo.png"), 4)
     interface_bg = pygame.transform.scale_by(load_image("interface_bg.png"), 4)
+    scope_image = pygame.transform.scale_by(load_image("scope.png"), 4)
 
     running = True
     curr_screen = 1  # 0 - игра, 1 - главное меню
@@ -142,9 +258,21 @@ if __name__ == '__main__':
                 terminate()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    if curr_screen == 0:
+                    if curr_screen == 0 or curr_screen == -1:
                         curr_screen = 1
                         black_fade = 1
+                        pygame.mouse.set_visible(True)
+                elif event.key == pygame.K_SPACE:
+                    if curr_screen == -1:
+                        if curr_level < len(LEVEL_MAPS) - 1:
+                            curr_level += 1
+                            player, level_x, level_y = generate_level(load_level(LEVEL_MAPS[curr_level]))
+                            black_fade = 1
+                            curr_screen = 0
+                        else:
+                            curr_screen = -2
+                            black_fade = 1
+                            pygame.mouse.set_visible(True)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if curr_screen != 0 and event.button == 1:
                     x, y = pygame.mouse.get_pos()
@@ -152,32 +280,27 @@ if __name__ == '__main__':
                         if button.check_clicked(x, y):
                             if button.function_type == 0:
                                 curr_screen = 0
-                                player, level_x, level_y = generate_level(load_level
-                                                                          (LEVEL_MAPS[button.par]),
-                                                                          tiles_group,
-                                                                          player_group,
-                                                                          enemy_group,
-                                                                          dead_enemies,
-                                                                          wall_group,
-                                                                          particle_group,
-                                                                          all_sprites)
+                                curr_level = button.par
+                                player, level_x, level_y = generate_level(load_level(LEVEL_MAPS[button.par]))
                                 black_fade = 1
+                                pygame.mouse.set_visible(False)
                             elif button.function_type == 1:
                                 terminate()
                             elif button.function_type == 2:
                                 curr_screen = button.par
 
-        # если игра началась, то отрисовываем спрайты
         if curr_screen == 0:
             player_group.update(pygame.key.get_pressed(), pygame.mouse.get_pressed(), delta_time,
                                 wall_group=wall_group, screen=screen, projectiles=projectiles)
             enemy_group.update(delta_time,
-                                wall_group=wall_group, screen=screen, projectiles=projectiles,
+                               wall_group=wall_group, screen=screen, projectiles=projectiles,
                                player=player, pickups=pickups)
             particle_group.update()
 
+            level_time += delta_time
+
             if player.health <= 0 and player.dead_timer <= 0:
-                curr_screen = 1
+                player, level_x, level_y = generate_level(load_level(LEVEL_MAPS[curr_level]))
                 black_fade = 1
 
             enemies_to_delete = []
@@ -186,12 +309,23 @@ if __name__ == '__main__':
                     enemies_to_delete.append(enemy)
             if enemies_to_delete:
                 for enemy in enemies_to_delete:
+                    if enemy not in wall_group:
+                        kills += 1
                     enemy_group.remove(enemy)
                     dead_enemies.add(enemy)
             if player:
                 camera.update(player)
                 for sprite in all_sprites:
                     camera.apply(sprite)
+
+            for hitbox in level_end_group:
+                if player.rect.colliderect(hitbox.rect):
+                    kill_bonus = random.randint(1, 999)
+                    curr_screen = -1
+                    total_dollars = (property_damage + kills * 1000 + (kill_bonus if kills > 0 else 0)
+                                     + (1000 if level_time < 200 else 500))
+                    if len(level_objective_group) == 0:
+                        total_dollars += 20000
 
             screen.fill((0, 0, 0))
             # сначала отрисовываем тайлы
@@ -200,23 +334,25 @@ if __name__ == '__main__':
             if projectiles:
                 for p in projectiles:
                     p.update()
-                    if not p.passes_env:
-                        for wall in wall_group:
-                            if p.rect.colliderect(wall.rect):
-                                if not wall in enemy_group or not p.player_friendly:
-                                    p.lifetime = 0
-                                    break
                     if p.player_friendly:
                         for enemy in enemy_group:
                             if p.rect.colliderect(enemy.rect):
                                 enemy.hurt(p.damage)
                                 if not p.piercing:
                                     p.lifetime = 0
+                                if len(enemy.groups()) == 0:  # нет групп - значит коробка
+                                    property_damage += enemy.dollars
                     else:
                         if p.rect.colliderect(player.rect):
                             player.hurt(p.damage)
                             if not p.piercing:
                                 p.lifetime = 0
+                    if not p.passes_env:
+                        for wall in wall_group:
+                            if p.rect.colliderect(wall.rect):
+                                if not wall in enemy_group or not p.player_friendly:
+                                    p.lifetime = 0
+                                    break
                     p.lifetime -= delta_time
                     if p.lifetime <= 0:
                         proj_to_delete.append(p)
@@ -238,6 +374,7 @@ if __name__ == '__main__':
                     for p in pickups_to_delete:
                         pickups.remove(p)
 
+            sign_group.draw(screen)
             # а уже затем игрока, иначе игрок может пропадать за тайлами
             dead_enemies.draw(screen)
             player_group.draw(screen)
@@ -247,18 +384,20 @@ if __name__ == '__main__':
             for i in range(player.health):
                 screen.blit(heart_image, (HEALTH_OFFSET[0] + i * 100, HEALTH_OFFSET[1]))
             screen.blit(ammo_image, (54, 154))
-            ammo_string = font.render(str(player.ammo), 1, (40, 24, 7))
-            text_rect = ammo_string.get_rect()
+            text = font.render(str(player.ammo), 1, (40, 24, 7))
+            text_rect = text.get_rect()
             text_rect.y = 149
             text_rect.x = 120
-            screen.blit(ammo_string, text_rect)
+            screen.blit(text, text_rect)
 
             particle_group.draw(screen)
+
+            sign_group.update(player.rect.centerx, player.rect.centery, screen=screen)
 
             if player:
                 if player.shoot_cd > 0:
                     pygame.draw.rect(screen, pygame.Color("white"),
-                                     (WIDTH // 2 - 20, HEIGHT // 2 + 40, int((player.shoot_cd / 2) * 80), 10))
+                                     (WIDTH // 2 - 20, HEIGHT // 2 + 40, int(player.shoot_cd * 40), 10))
                 if player.spin_seconds == 0:
                     pass
 
@@ -296,15 +435,69 @@ if __name__ == '__main__':
                     draw_spin_rect(1, (255, 0, 0))
                 elif 12 <= player.spin_seconds < 14:
                     draw_spin_rect(2, (255, 0, 0))
+
+            screen.blit(scope_image, (pygame.mouse.get_pos()[0] - scope_image.get_width() // 2,
+                                      pygame.mouse.get_pos()[1] - scope_image.get_height() // 2))
+        elif curr_screen == -1:
+            screen.blit(load_image("endscreen_bg.png", screen.get_width(), screen.get_height()), (0, 0))
+            texts = [f"enemies killed:  {kills}", f"time taken:  {int(level_time)}",
+                     f"property damage:  ${property_damage}"]
+            text_pos_1 = (WIDTH // 2 - 350, HEIGHT // 2 - 300)
+            for i in range(len(texts)):
+                text = font.render(texts[i], 1, (40, 24, 7))
+                text_rect = text.get_rect()
+                text_rect.y = text_pos_1[1] + i * 80
+                text_rect.x = text_pos_1[0]
+                screen.blit(text, text_rect)
+
+            texts_dollars = [f"${kills * 1000 + kill_bonus}", f"${1000 if level_time < 200 else 500}",
+                             f"${property_damage}"]
+            for i in range(len(texts)):
+                text = font.render(texts_dollars[i], 1, (40, 24, 7))
+                text_rect = text.get_rect()
+                text_rect.y = text_pos_1[1] + i * 80
+                text_rect.x = text_pos_1[0] + 630
+                screen.blit(text, text_rect)
+
+            if len(level_objective_group) == 0:  # склад разрушен
+                text = font.render("stronghold destruction bonus:", 1, (40, 24, 7))
+                text_rect = text.get_rect()
+                text_rect.y = text_pos_1[1] + 3 * 80
+                text_rect.x = text_pos_1[0]
+                screen.blit(text, text_rect)
+
+                text2 = font.render("$20000!", 1, (40, 24, 7))
+                text_rect2 = text2.get_rect()
+                text_rect2.y = text_pos_1[1] + 3 * 80
+                text_rect2.x = text_pos_1[0] + 630
+                screen.blit(text2, text_rect2)
+
+            text1 = font.render("total revenue:", 1, (40, 24, 7))
+            text_rect1 = text1.get_rect()
+            text_rect1.y = text_pos_1[1] + 5 * 80
+            text_rect1.x = text_pos_1[0]
+            screen.blit(text1, text_rect1)
+
+            text2 = font.render(f"${total_dollars}", 1, (40, 24, 7))
+            text_rect2 = text2.get_rect()
+            text_rect2.y = text_pos_1[1] + 5 * 80
+            text_rect2.x = text_pos_1[0] + 630
+            screen.blit(text2, text_rect2)
+
+            text3 = font.render("[esc] - main menu      [space] - next level", 1, (40, 24, 7))
+            text_rect3 = text3.get_rect()
+            text_rect3.y = text_pos_1[1] + int(7 * 80)
+            text_rect3.x = WIDTH // 2 - text_rect3.w // 2
+            screen.blit(text3, text_rect3)
         else:
             screen.blit(load_image("background.png", screen.get_width(), screen.get_height()), (0, 0))
             for button in button_group[curr_screen - 1]:
                 screen.blit(button.image, (button.pos_x, button.pos_y))
-                ammo_string = font.render(button.text.lower(), 1, (40, 24, 7))
-                text_rect = ammo_string.get_rect()
+                text = font.render(button.text.lower(), 1, (40, 24, 7))
+                text_rect = text.get_rect()
                 text_rect.y = button.pos_y + button.rect.h // 2 - text_rect.h // 2 + 5
                 text_rect.x = button.pos_x + button.rect.w // 2 - text_rect.w // 2
-                screen.blit(ammo_string, text_rect)
+                screen.blit(text, text_rect)
 
         if black_fade > 0:
             fade_rect = pygame.Surface((WIDTH, HEIGHT))
