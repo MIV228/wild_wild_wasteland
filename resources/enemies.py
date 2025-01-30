@@ -70,10 +70,9 @@ class GunEnemy(Enemy):
     def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
         super().shoot(screen, projectiles, player_pos_x, player_pos_y)
 
-        bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
-                            player_pos_x, player_pos_y,
-                            25, 1, 3, "bullet")
-        projectiles.append(bullet)
+        projectiles.append(Projectile(screen, self.rect.centerx, self.rect.centery,
+                                      player_pos_x, player_pos_y,
+                                      25, 1, 3, "bullet"))
         self.ammo -= 1
 
     def reload(self):
@@ -147,7 +146,7 @@ class ShotgunEnemy(Enemy):
         super().shoot(screen, projectiles, player_pos_x, player_pos_y)
 
         for i in range(5):
-            projectiles.append(Projectile(screen, self.rect.x - 10, self.rect.y,
+            projectiles.append(Projectile(screen, self.rect.centerx, self.rect.centery,
                                           player_pos_x, player_pos_y,
                                           25, 1, 3, "bullet", additional_angle=(i - 2) * 5))
         self.shoot_cd = 1.6
@@ -213,11 +212,11 @@ class MinigunEnemy(Enemy):
     def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
         if self.is_dead:
             return
-        bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
-                            player_pos_x, player_pos_y,
-                            25, 1, 3, "bullet",
-                            additional_angle=random.choice([x for x in range(-5, 5)]))
-        projectiles.append(bullet)
+
+        projectiles.append(Projectile(screen, self.rect.centerx, self.rect.centery,
+                                      player_pos_x, player_pos_y,
+                                      25, 1, 3, "bullet",
+                                      additional_angle=random.choice([x for x in range(-5, 5)])))
         self.shoot_cd = 0.15
         self.ammo -= 1
 
@@ -339,8 +338,9 @@ class Cactus(Enemy):
         self.kill()
 
         for i in range(12):
-            self.proj.append(Projectile(self.screen, self.rect.centerx, self.rect.centery, self.rect.centerx + 10, self.rect.centery,
-                                       25, 30, 3, "spike", player_friendly=True, additional_angle=i * 30))
+            self.proj.append(
+                Projectile(self.screen, self.rect.centerx, self.rect.centery, self.rect.centerx + 10, self.rect.centery,
+                           25, 30, 3, "spike", player_friendly=True, additional_angle=i * 30))
 
         create_particles((self.rect.centerx, self.rect.centery), "cactus_chip.png", 30, *self.p_groups)
 

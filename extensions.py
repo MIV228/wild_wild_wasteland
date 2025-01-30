@@ -4,6 +4,7 @@ import sys
 import pygame
 from pygame import Surface
 
+
 def load_image(name, scale_x=0, scale_y=0, color_key=None) -> Surface:
     fullname = os.path.join('data', name)
 
@@ -26,6 +27,7 @@ def load_image(name, scale_x=0, scale_y=0, color_key=None) -> Surface:
 
     return image
 
+
 def load_level(filename):
     filename = "data/" + filename
     # читаем уровень, убирая символы перевода строки
@@ -37,6 +39,7 @@ def load_level(filename):
 
     # дополняем каждую строку пустыми клетками ('.')
     return list(map(lambda x: x.ljust(max_width, '#'), level_map))
+
 
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y, *groups):
@@ -69,6 +72,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
     def reset(self):
         self.update_cd = 0
         self.cur_frame = 0
+
 
 def get_sheet_image(x, y, width, height, sprite_sheet, color_key=None):
     image = pygame.Surface.subsurface(sprite_sheet, (x, y, width, height))

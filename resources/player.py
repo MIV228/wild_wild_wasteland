@@ -14,6 +14,7 @@ class Player(pygame.sprite.Sprite):
         self.a_idle = AnimatedSprite(load_image("player_idle.png"), 5, 1, pos_x, pos_y, groups[-1])
         self.a_idle_spin = AnimatedSprite(load_image("player_idle_spin.png"), 5, 1, pos_x, pos_y, groups[-1])
         self.a_run = AnimatedSprite(load_image("player_run.png"), 4, 1, pos_x, pos_y, groups[-1])
+        self.a_run_spin = AnimatedSprite(load_image("player_run.png"), 4, 1, pos_x, pos_y, groups[-1])
 
         self.curr_anim = self.a_idle
         self.image = self.curr_anim.image
@@ -30,6 +31,7 @@ class Player(pygame.sprite.Sprite):
 
         self.facing_right = True
         self.moved_last_update = False
+        self.spin_last_update = False
 
         self.p_groups = [particle_group, groups[-1]]
 
@@ -46,77 +48,82 @@ class Player(pygame.sprite.Sprite):
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 15, 5, 0.8, "steel_ball", True)
         elif 0.16 <= self.spin_seconds < 0.33:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 20, 10, 0.9, "steel_ball", True)
         elif 0.33 <= self.spin_seconds < 0.5:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 20, 10, 1, "steel_ball", True)
 
         elif 0.5 <= self.spin_seconds < 0.8:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 20, 20, 2, "steel_ball", True)
         elif 0.8 <= self.spin_seconds < 1.2:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 23, 25, 2, "steel_ball", True)
         elif 1.2 <= self.spin_seconds < 1.5:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 25, 30, 2, "steel_ball", True)
 
         elif 1.5 <= self.spin_seconds < 2.4:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 35, 30, 1, "steel_ball", True, True)
         elif 2.4 <= self.spin_seconds < 3.3:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 45, 40, 1, "steel_ball", True, True)
         elif 3.3 <= self.spin_seconds < 3.5:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 60, 100, 0.8, "steel_ball", True, True, True)
 
         elif 3.5 <= self.spin_seconds < 5.33:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 45, 50, 1, "steel_ball", True, True)
         elif 5.33 <= self.spin_seconds < 6.66:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 40, 60, 1, "steel_ball", True, True)
         elif 6.66 <= self.spin_seconds < 8:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 35, 70, 1, "steel_ball", True, True)
 
         elif 8 <= self.spin_seconds < 10:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 30, 75, 2, "tornado", True, True, True)
         elif 10 <= self.spin_seconds < 12:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 20, 80, 3, "tornado", True, True, True)
         elif 12 <= self.spin_seconds < 14:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 10, 85, 4, "tornado", True, True, True)
         else:
-            bullet = Projectile(screen, self.rect.x - 10, self.rect.y,
+            bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                 5, 90, 8, "tornado", True, True, True)
         projectiles.append(bullet)
         self.spin_seconds = 0
 
+        if self.moved_last_update:
+            self.change_animation(self.a_run)
+        else:
+            self.change_animation(self.a_idle)
+
     def shotgun(self, screen, projectiles):
         self.ammo -= 10
 
         for i in range(5):
-            projectiles.append(Projectile(screen, self.rect.x - 10, self.rect.y,
+            projectiles.append(Projectile(screen, self.rect.centerx, self.rect.centery,
                                           pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                           40, 15, 1, "bullet", additional_angle=(i - 2) * 3,
                                           player_friendly=True))
@@ -135,7 +142,7 @@ class Player(pygame.sprite.Sprite):
         self.curr_anim = anim
 
     def update(self, keys, mousebuttons, delta_time, wall_group,
-               screen:pygame.Surface, projectiles) -> None:
+               screen: pygame.Surface, projectiles) -> None:
         if self.health <= 0:
             self.dead_timer -= delta_time
             return
@@ -158,8 +165,6 @@ class Player(pygame.sprite.Sprite):
                 self.speed = 8
             else:
                 self.speed = 9
-
-
 
             if mousebuttons[2]:
                 if self.ammo >= 10 and self.shoot_cd <= 0:
@@ -215,20 +220,29 @@ class Player(pygame.sprite.Sprite):
             if apply_y: p.y -= step_y
 
         if mousebuttons[0]:
+            if not self.spin_last_update:
+                if (apply_x and step_x != 0) or (apply_y and step_y != 0):
+                    self.change_animation(self.a_run_spin)
+                else:
+                    self.change_animation(self.a_idle_spin)
             self.spin_seconds += delta_time
             if self.spin_seconds > 14:
                 self.shoot(screen, projectiles)
-            self.change_animation(self.a_idle_spin)
         else:
             if self.spin_seconds != 0:
                 self.shoot(screen, projectiles)
-            self.change_animation(self.a_idle)
 
-        if apply_x or apply_y:  # пошел
+        if (apply_x and step_x != 0) or (apply_y and step_y != 0):  # пошел
             if not self.moved_last_update:
                 self.change_animation(self.a_run)
+                self.moved_last_update = True
         else:
             if self.moved_last_update:
-                self.change_animation(self.a_idle)
+                if self.spin_seconds > 0:
+                    self.change_animation(self.a_idle_spin)
+                else:
+                    self.change_animation(self.a_idle)
+                self.moved_last_update = False
 
-        self.moved_last_update = apply_x or apply_y
+        self.moved_last_update = (apply_x and step_x != 0) or (apply_y and step_y != 0)
+        self.spin_last_update = mousebuttons[0]

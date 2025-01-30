@@ -19,7 +19,7 @@ def terminate():
 
 
 def generate_level(level, *delete_groups):
-    global kills, level_time, tiles_group, player_group, enemy_group, dead_enemies, curr_level, sign_group,\
+    global kills, level_time, tiles_group, player_group, enemy_group, dead_enemies, curr_level, sign_group, \
         wall_group, particle_group, level_objective_group, all_sprites, property_damage, total_dollars, level_end_group
     if tiles_group:
         tiles_group.empty()
@@ -320,9 +320,12 @@ if __name__ == '__main__':
 
             for hitbox in level_end_group:
                 if player.rect.colliderect(hitbox.rect):
-                    kill_bonus = random.randint(1, 999)
+                    if kills != 0:
+                        kill_bonus = random.randint(1, 999)
+                    else:
+                        kill_bonus = 0
                     curr_screen = -1
-                    total_dollars = (property_damage + kills * 1000 + (kill_bonus if kills > 0 else 0)
+                    total_dollars = (property_damage + kills * 1000 + kill_bonus
                                      + (1000 if level_time < 200 else 500))
                     if len(level_objective_group) == 0:
                         total_dollars += 20000

@@ -3,6 +3,7 @@ import math
 from constants import PROJECTILE_IMAGES, WIDTH, HEIGHT
 from extensions import load_image
 
+
 class Projectile:
     def __init__(self, screen, x, y, mouse_x, mouse_y, speed, damage, lifetime, p_type,
                  player_friendly=False, piercing=False, passes_environment=False, additional_angle=0):
@@ -12,15 +13,15 @@ class Projectile:
         self.image = pygame.transform.rotate(self.image, self.angle * 1.275 * -45)
         self.damage = damage
         self.lifetime = lifetime
-        self.x = x - self.image.get_width()
-        self.y = y - self.image.get_height()
+        self.x = x - (self.image.get_width() // 2)
+        self.y = y - (self.image.get_height() // 2)
         self.rect = self.image.get_rect().move(x, y)
         self.speed = speed
         self.vel_x = math.cos(self.angle) * self.speed
         self.vel_y = math.sin(self.angle) * self.speed
         self.screen = screen
-        self.x -= math.cos(self.angle) * self.rect.width
-        self.y -= math.sin(self.angle) * self.rect.width
+        self.x -= math.cos(self.angle) * self.rect.width / 2
+        self.y -= math.sin(self.angle) * self.rect.width / 2
         self.player_friendly = player_friendly
         self.piercing = piercing
         self.passes_env = passes_environment
