@@ -201,7 +201,7 @@ if __name__ == '__main__':
     pygame.init()
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
-    #screen = pygame.display.set_mode((1200, 675))
+    # screen = pygame.display.set_mode((1200, 675))
     pygame.display.set_caption("Wild Wild Wasteland")
 
     clock = pygame.time.Clock()
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     button_group = []
 
     # отрисовываем начальный экран
-    start_screen(screen, button_group)
+    start_screen(button_group)
 
     # основной персонаж
     camera = Camera()
@@ -240,9 +240,16 @@ if __name__ == '__main__':
     # загружаем карту
     player, level_x, level_y = None, None, None
 
+    savefile = open("data/savefile.txt", mode="a+", encoding="utf-8")
+    savefile.seek(0)
+    lines = savefile.read().split("\n")
+    if len(lines) < 3:
+        lines = ["0", "0", "0", "0", "0"]
+
     delta_time = 0
 
     font = pygame.font.Font("www_font.ttf", 60)
+    big_font = pygame.font.Font("www_font.ttf", 90)
     black_fade = 1
 
     heart_image = pygame.transform.scale_by(load_image("heart.png"), 2)
@@ -251,7 +258,7 @@ if __name__ == '__main__':
     scope_image = pygame.transform.scale_by(load_image("scope.png"), 4)
 
     running = True
-    curr_screen = 1  # 0 - игра, 1 - главное меню
+    curr_screen = 1  # -2 - конец игры, -1 - конец уровня, 0 - игра, 1... - главное меню
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -273,8 +280,12 @@ if __name__ == '__main__':
                             curr_screen = -2
                             black_fade = 1
                             pygame.mouse.set_visible(True)
+                    elif curr_screen == -2:
+                        curr_screen = 1
+                        black_fade = 1
+                        pygame.mouse.set_visible(True)
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if curr_screen != 0 and event.button == 1:
+                if curr_screen >= 1 and event.button == 1:
                     x, y = pygame.mouse.get_pos()
                     for button in button_group[curr_screen - 1]:
                         if button.check_clicked(x, y):
@@ -288,6 +299,12 @@ if __name__ == '__main__':
                                 terminate()
                             elif button.function_type == 2:
                                 curr_screen = button.par
+                                if button.par == 2 and lines[4] == "0":
+                                    curr_screen = 0
+                                    curr_level = 0
+                                    player, level_x, level_y = generate_level(load_level(LEVEL_MAPS[0]))
+                                    black_fade = 1
+                                    pygame.mouse.set_visible(False)
 
         if curr_screen == 0:
             player_group.update(pygame.key.get_pressed(), pygame.mouse.get_pressed(), delta_time,
@@ -318,6 +335,12 @@ if __name__ == '__main__':
                 for sprite in all_sprites:
                     camera.apply(sprite)
 
+            # сейв - файл:
+            # 1) total kills
+            # 2) property damage
+            # 3) total strongholds
+            # 4) total revenue
+            # 5) current level
             for hitbox in level_end_group:
                 if player.rect.colliderect(hitbox.rect):
                     if kills != 0:
@@ -329,6 +352,18 @@ if __name__ == '__main__':
                                      + (1000 if level_time < 200 else 500))
                     if len(level_objective_group) == 0:
                         total_dollars += 20000
+
+                    if len(lines) < 3:
+                        lines = ["0", "0", "0", "0", "0"]
+                    savefile.truncate(0)
+                    savefile.write("\n".join([str(int(lines[0]) + kills),
+                                              str(int(lines[1]) + property_damage),
+                                              str(int(lines[2]) + 1 if len(level_objective_group) == 0 else 0),
+                                              str(int(lines[3]) + total_dollars),
+                                              str(curr_level) if curr_level > int(lines[4]) else lines[4]]))
+                    savefile.seek(0)
+                    lines = savefile.read().split("\n")
+
 
             screen.fill((0, 0, 0))
             # сначала отрисовываем тайлы
@@ -463,25 +498,25 @@ if __name__ == '__main__':
                 screen.blit(text, text_rect)
 
             if len(level_objective_group) == 0:  # склад разрушен
-                text = font.render("stronghold destruction bonus:", 1, (40, 24, 7))
+                text = big_font.render("stronghold destruction bonus:", 1, (40, 24, 7))
                 text_rect = text.get_rect()
-                text_rect.y = text_pos_1[1] + 3 * 80
+                text_rect.y = text_pos_1[1] + 3 * 80 + 30
                 text_rect.x = text_pos_1[0]
                 screen.blit(text, text_rect)
 
-                text2 = font.render("$20000!", 1, (40, 24, 7))
+                text2 = big_font.render("$20000!", 1, (40, 24, 7))
                 text_rect2 = text2.get_rect()
                 text_rect2.y = text_pos_1[1] + 3 * 80
                 text_rect2.x = text_pos_1[0] + 630
                 screen.blit(text2, text_rect2)
 
-            text1 = font.render("total revenue:", 1, (40, 24, 7))
+            text1 = big_font.render("total revenue:", 1, (40, 24, 7))
             text_rect1 = text1.get_rect()
             text_rect1.y = text_pos_1[1] + 5 * 80
             text_rect1.x = text_pos_1[0]
             screen.blit(text1, text_rect1)
 
-            text2 = font.render(f"${total_dollars}", 1, (40, 24, 7))
+            text2 = big_font.render(f"${total_dollars}", 1, (40, 24, 7))
             text_rect2 = text2.get_rect()
             text_rect2.y = text_pos_1[1] + 5 * 80
             text_rect2.x = text_pos_1[0] + 630
@@ -490,6 +525,41 @@ if __name__ == '__main__':
             text3 = font.render("[esc] - main menu      [space] - next level", 1, (40, 24, 7))
             text_rect3 = text3.get_rect()
             text_rect3.y = text_pos_1[1] + int(7 * 80)
+            text_rect3.x = WIDTH // 2 - text_rect3.w // 2
+            screen.blit(text3, text_rect3)
+        elif curr_screen == -2:
+            # сейв - файл:
+            # 1) total kills
+            # 2) property damage
+            # 3) total strongholds
+            # 4) total revenue
+            # 5) current level
+            screen.blit(load_image("endscreen_bg.png", screen.get_width(), screen.get_height()), (0, 0))
+            texts = [f"total kills:  {lines[0]}", f"total property damage:  ${lines[1]}",
+                     f"strongholds destroyed:  {lines[2]}"]
+            text_pos_1 = (WIDTH // 2 - 350, HEIGHT // 2 - 300)
+            for i in range(len(texts)):
+                text = font.render(texts[i], 1, (40, 24, 7))
+                text_rect = text.get_rect()
+                text_rect.y = text_pos_1[1] + i * 80
+                text_rect.x = text_pos_1[0]
+                screen.blit(text, text_rect)
+
+            text1 = font.render(f"total revenue:  ${lines[3]}", 1, (40, 24, 7))
+            text_rect1 = text1.get_rect()
+            text_rect1.y = text_pos_1[1] + 4 * 80
+            text_rect1.x = text_pos_1[0]
+            screen.blit(text1, text_rect1)
+
+            text2 = big_font.render("thanks for playing!", 1, (40, 24, 7))
+            text_rect2 = text2.get_rect()
+            text_rect2.y = text_pos_1[1] + 6 * 80
+            text_rect2.x = WIDTH // 2 - text_rect2.w // 2
+            screen.blit(text2, text_rect2)
+
+            text3 = font.render("[space] - main menu", 1, (40, 24, 7))
+            text_rect3 = text3.get_rect()
+            text_rect3.y = text_pos_1[1] + int(7.5 * 80)
             text_rect3.x = WIDTH // 2 - text_rect3.w // 2
             screen.blit(text3, text_rect3)
         else:
@@ -512,4 +582,5 @@ if __name__ == '__main__':
         pygame.display.flip()
         delta_time = clock.tick(FPS) / 1000
 
+    savefile.close()
     pygame.quit()

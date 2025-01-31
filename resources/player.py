@@ -13,8 +13,8 @@ class Player(pygame.sprite.Sprite):
         # анимации
         self.a_idle = AnimatedSprite(load_image("player_idle.png"), 5, 1, pos_x, pos_y, groups[-1])
         self.a_idle_spin = AnimatedSprite(load_image("player_idle_spin.png"), 5, 1, pos_x, pos_y, groups[-1])
-        self.a_run = AnimatedSprite(load_image("player_run.png"), 4, 1, pos_x, pos_y, groups[-1])
-        self.a_run_spin = AnimatedSprite(load_image("player_run.png"), 4, 1, pos_x, pos_y, groups[-1])
+        self.a_run = AnimatedSprite(load_image("player_run.png"), 2, 1, pos_x, pos_y, groups[-1])
+        self.a_run_spin = AnimatedSprite(load_image("player_run_spin.png"), 2, 1, pos_x, pos_y, groups[-1])
 
         self.curr_anim = self.a_idle
         self.image = self.curr_anim.image
@@ -234,7 +234,10 @@ class Player(pygame.sprite.Sprite):
 
         if (apply_x and step_x != 0) or (apply_y and step_y != 0):  # пошел
             if not self.moved_last_update:
-                self.change_animation(self.a_run)
+                if self.spin_seconds > 0:
+                    self.change_animation(self.a_run_spin)
+                else:
+                    self.change_animation(self.a_run)
                 self.moved_last_update = True
         else:
             if self.moved_last_update:
