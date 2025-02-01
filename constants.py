@@ -30,6 +30,11 @@ LEVEL_MAPS = {
     1: "map1.txt"
 }
 
+LEVEL_MUSIC = {
+    0: "tutorial.mp3",
+    1: "gunpowder_canyon.mp3"
+}
+
 PLAYER_IMAGE = 'mar.png'
 
 TILE_WIDTH = TILE_HEIGHT = 100

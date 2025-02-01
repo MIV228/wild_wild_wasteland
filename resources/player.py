@@ -127,7 +127,7 @@ class Player(pygame.sprite.Sprite):
                                           pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                           40, 15, 1, "bullet", additional_angle=(i - 2) * 3,
                                           player_friendly=True))
-        self.shoot_cd = 1
+        self.shoot_cd = 0.5
 
     def hurt(self, damage):
         self.health -= damage

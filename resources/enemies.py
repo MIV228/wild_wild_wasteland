@@ -339,7 +339,8 @@ class Cactus(Enemy):
 
         for i in range(12):
             self.proj.append(
-                Projectile(self.screen, self.rect.centerx, self.rect.centery, self.rect.centerx + 10, self.rect.centery,
+                Projectile(self.screen, self.rect.centerx, self.rect.centery,
+                           self.rect.centerx + 10, self.rect.centery,
                            25, 30, 3, "spike", player_friendly=True, additional_angle=i * 30))
 
         create_particles((self.rect.centerx, self.rect.centery), "cactus_chip.png", 30, *self.p_groups)

@@ -3,14 +3,14 @@ import sys
 
 import pygame
 
-from constants import WIDTH, HEIGHT, FPS, LEVEL_MAPS, SPIN_RECTS, HEALTH_OFFSET
-from extensions import load_level, load_image
+from constants import WIDTH, HEIGHT, FPS, LEVEL_MAPS, SPIN_RECTS, HEALTH_OFFSET, LEVEL_MUSIC
+from extensions import load_level, load_image, load_sound
 from resources.camera import Camera
-from screens import start_screen
-from resources.player import Player
-from resources.tile import Tile
 from resources.enemies import GunEnemy, Box, ShotgunEnemy, Cactus, Plank, MinigunEnemy
+from resources.player import Player
 from resources.sign import Sign
+from resources.tile import Tile
+from screens import start_screen
 
 
 def terminate():
@@ -19,8 +19,9 @@ def terminate():
 
 
 def generate_level(level, *delete_groups):
-    global kills, level_time, tiles_group, player_group, enemy_group, dead_enemies, curr_level, sign_group, \
-        wall_group, particle_group, level_objective_group, all_sprites, property_damage, total_dollars, level_end_group
+    global kills, level_time, tiles_group, player_group, enemy_group, dead_enemies, curr_level,\
+        sign_group, wall_group, particle_group, level_objective_group, all_sprites,\
+        property_damage, total_dollars, level_end_group
     if tiles_group:
         tiles_group.empty()
         player_group.empty()
@@ -41,6 +42,9 @@ def generate_level(level, *delete_groups):
         level_time = 0
         property_damage = 0
         total_dollars = 0
+    pygame.mixer.music.load(load_sound(LEVEL_MUSIC[curr_level]))
+    pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(1)
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -102,10 +106,12 @@ def generate_level(level, *delete_groups):
                     Sign(x, y, "use WASD to move", sign_group, all_sprites)
                 elif level[y][x] == "1":
                     Tile('empty', x, y, tiles_group, all_sprites)
-                    Sign(x, y, "hold [LMB] to spin the ball, release to shoot it", sign_group, all_sprites)
+                    Sign(x, y, "hold [LMB] to spin the ball, release to shoot it", sign_group,
+                         all_sprites)
                 elif level[y][x] == "2":
                     Tile('empty', x, y, tiles_group, all_sprites)
-                    Sign(x, y, "balls with perfect rotation deal double damage", sign_group, all_sprites)
+                    Sign(x, y, "balls with perfect rotation deal double damage", sign_group,
+                         all_sprites)
                 elif level[y][x] == "3":
                     Tile('empty', x, y, tiles_group, all_sprites)
                     Sign(x, y, "press [RMB] to quickdraw a shotgun blast", sign_group, all_sprites)
@@ -163,7 +169,8 @@ def generate_level(level, *delete_groups):
                     Box(x, y, particle_group, enemy_group, wall_group, all_sprites)
                 elif level[y][x] == '!':
                     Tile('empty', x, y, tiles_group, all_sprites)
-                    Box(x, y, particle_group, enemy_group, level_objective_group, wall_group, all_sprites)
+                    Box(x, y, particle_group, enemy_group, level_objective_group, wall_group,
+                        all_sprites)
                 elif level[y][x] == 'S':
                     Tile('empty', x, y, tiles_group, all_sprites)
                     ShotgunEnemy(x, y, particle_group, enemy_group, all_sprites)
@@ -269,11 +276,14 @@ if __name__ == '__main__':
                         curr_screen = 1
                         black_fade = 1
                         pygame.mouse.set_visible(True)
+                        button_group.clear()
+                        start_screen(button_group)
                 elif event.key == pygame.K_SPACE:
                     if curr_screen == -1:
                         if curr_level < len(LEVEL_MAPS) - 1:
                             curr_level += 1
-                            player, level_x, level_y = generate_level(load_level(LEVEL_MAPS[curr_level]))
+                            player, level_x, level_y = generate_level(
+                                load_level(LEVEL_MAPS[curr_level]))
                             black_fade = 1
                             curr_screen = 0
                         else:
@@ -284,6 +294,8 @@ if __name__ == '__main__':
                         curr_screen = 1
                         black_fade = 1
                         pygame.mouse.set_visible(True)
+                        button_group.clear()
+                        start_screen(button_group)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if curr_screen >= 1 and event.button == 1:
                     x, y = pygame.mouse.get_pos()
@@ -292,7 +304,8 @@ if __name__ == '__main__':
                             if button.function_type == 0:
                                 curr_screen = 0
                                 curr_level = button.par
-                                player, level_x, level_y = generate_level(load_level(LEVEL_MAPS[button.par]))
+                                player, level_x, level_y = generate_level(
+                                    load_level(LEVEL_MAPS[button.par]))
                                 black_fade = 1
                                 pygame.mouse.set_visible(False)
                             elif button.function_type == 1:
@@ -302,7 +315,8 @@ if __name__ == '__main__':
                                 if button.par == 2 and lines[4] == "0":
                                     curr_screen = 0
                                     curr_level = 0
-                                    player, level_x, level_y = generate_level(load_level(LEVEL_MAPS[0]))
+                                    player, level_x, level_y = generate_level(
+                                        load_level(LEVEL_MAPS[0]))
                                     black_fade = 1
                                     pygame.mouse.set_visible(False)
 
@@ -358,12 +372,15 @@ if __name__ == '__main__':
                     savefile.truncate(0)
                     savefile.write("\n".join([str(int(lines[0]) + kills),
                                               str(int(lines[1]) + property_damage),
-                                              str(int(lines[2]) + 1 if len(level_objective_group) == 0 else 0),
+                                              str(int(lines[2]) + 1 if len(
+                                                  level_objective_group) == 0 else 0),
                                               str(int(lines[3]) + total_dollars),
-                                              str(curr_level) if curr_level > int(lines[4]) else lines[4]]))
+                                              str(curr_level) if curr_level > int(lines[4]) else
+                                              lines[4]]))
                     savefile.seek(0)
                     lines = savefile.read().split("\n")
 
+                    pygame.mixer.music.set_volume(0.4)
 
             screen.fill((0, 0, 0))
             # сначала отрисовываем тайлы
@@ -435,7 +452,8 @@ if __name__ == '__main__':
             if player:
                 if player.shoot_cd > 0:
                     pygame.draw.rect(screen, pygame.Color("white"),
-                                     (WIDTH // 2 - 20, HEIGHT // 2 + 40, int(player.shoot_cd * 40), 10))
+                                     (WIDTH // 2 - 20, HEIGHT // 2 + 40, int(player.shoot_cd * 80),
+                                      10))
                 if player.spin_seconds == 0:
                     pass
 
@@ -477,7 +495,8 @@ if __name__ == '__main__':
             screen.blit(scope_image, (pygame.mouse.get_pos()[0] - scope_image.get_width() // 2,
                                       pygame.mouse.get_pos()[1] - scope_image.get_height() // 2))
         elif curr_screen == -1:
-            screen.blit(load_image("endscreen_bg.png", screen.get_width(), screen.get_height()), (0, 0))
+            screen.blit(load_image("endscreen_bg.png", screen.get_width(), screen.get_height()),
+                        (0, 0))
             texts = [f"enemies killed:  {kills}", f"time taken:  {int(level_time)}",
                      f"property damage:  ${property_damage}"]
             text_pos_1 = (WIDTH // 2 - 350, HEIGHT // 2 - 300)
@@ -488,7 +507,8 @@ if __name__ == '__main__':
                 text_rect.x = text_pos_1[0]
                 screen.blit(text, text_rect)
 
-            texts_dollars = [f"${kills * 1000 + kill_bonus}", f"${1000 if level_time < 200 else 500}",
+            texts_dollars = [f"${kills * 1000 + kill_bonus}",
+                             f"${1000 if level_time < 200 else 500}",
                              f"${property_damage}"]
             for i in range(len(texts)):
                 text = font.render(texts_dollars[i], 1, (40, 24, 7))
@@ -498,9 +518,9 @@ if __name__ == '__main__':
                 screen.blit(text, text_rect)
 
             if len(level_objective_group) == 0:  # склад разрушен
-                text = big_font.render("stronghold destruction bonus:", 1, (40, 24, 7))
+                text = font.render("stronghold destruction bonus:", 1, (40, 24, 7))
                 text_rect = text.get_rect()
-                text_rect.y = text_pos_1[1] + 3 * 80 + 30
+                text_rect.y = text_pos_1[1] + 3 * 80
                 text_rect.x = text_pos_1[0]
                 screen.blit(text, text_rect)
 
@@ -534,7 +554,8 @@ if __name__ == '__main__':
             # 3) total strongholds
             # 4) total revenue
             # 5) current level
-            screen.blit(load_image("endscreen_bg.png", screen.get_width(), screen.get_height()), (0, 0))
+            screen.blit(load_image("endscreen_bg.png", screen.get_width(), screen.get_height()),
+                        (0, 0))
             texts = [f"total kills:  {lines[0]}", f"total property damage:  ${lines[1]}",
                      f"strongholds destroyed:  {lines[2]}"]
             text_pos_1 = (WIDTH // 2 - 350, HEIGHT // 2 - 300)
@@ -563,7 +584,8 @@ if __name__ == '__main__':
             text_rect3.x = WIDTH // 2 - text_rect3.w // 2
             screen.blit(text3, text_rect3)
         else:
-            screen.blit(load_image("background.png", screen.get_width(), screen.get_height()), (0, 0))
+            screen.blit(load_image("background.png", screen.get_width(), screen.get_height()),
+                        (0, 0))
             for button in button_group[curr_screen - 1]:
                 screen.blit(button.image, (button.pos_x, button.pos_y))
                 text = font.render(button.text.lower(), 1, (40, 24, 7))

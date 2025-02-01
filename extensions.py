@@ -5,6 +5,16 @@ import pygame
 from pygame import Surface
 
 
+def load_sound(name) -> str:
+    fullname = os.path.join('audio', name)
+
+    # если файл не существует, то выходим
+    if not os.path.isfile(fullname):
+        print(f"Файл со звуком '{fullname}' не найден")
+        sys.exit()
+
+    return fullname
+
 def load_image(name, scale_x=0, scale_y=0, color_key=None) -> Surface:
     fullname = os.path.join('data', name)
 
