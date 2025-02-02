@@ -1,6 +1,6 @@
 import pygame
 from extensions import load_sound
-from resources.button import Button
+from scripts.button import Button
 
 
 def start_screen(button_group) -> None:

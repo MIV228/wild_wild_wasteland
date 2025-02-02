@@ -21,7 +21,8 @@ PROJECTILE_IMAGES = {
     "ammo": "ammo.png",
     "bullet": "bullet.png",
     "steel_ball": "steel_ball.png",
-    "tornado": "plank.png",
+    "spin_ball": "spin_ball.png",
+    "tornado": "tornado.png",
     "spike": "spike.png"
 }
 

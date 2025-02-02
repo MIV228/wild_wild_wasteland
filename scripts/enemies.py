@@ -3,10 +3,10 @@ import random
 import pygame
 
 from constants import PLAYER_IMAGE, TILE_WIDTH, TILE_HEIGHT
-from extensions import load_image
-from resources.projectile import Projectile
-from resources.pickups import Pickup
-from resources.particles import create_particles
+from extensions import load_image, load_sound
+from scripts.projectile import Projectile
+from scripts.pickups import Pickup
+from scripts.particles import create_particles
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -30,6 +30,9 @@ class Enemy(pygame.sprite.Sprite):
         self.is_dead = False
         self.p_groups = [particle_group, groups[-1]]
 
+        self.left_image = pygame.transform.flip(self.image, True, False)
+        self.right_image = self.image
+
     def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
         if self.is_dead: return
 
@@ -48,6 +51,8 @@ class Enemy(pygame.sprite.Sprite):
 
         create_particles((self.rect.centerx, self.rect.centery), "blood.png", 40, *self.p_groups)
 
+        return "damage"
+
     def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
         if self.is_dead: return
 
@@ -56,6 +61,11 @@ class Enemy(pygame.sprite.Sprite):
                 self.saw_player = True
             else:
                 return
+
+        if player.rect.centerx > self.rect.centerx:
+            self.image = self.right_image
+        else:
+            self.image = self.left_image
 
 
 class GunEnemy(Enemy):
@@ -67,6 +77,8 @@ class GunEnemy(Enemy):
         self.image_left = self.image
         self.image_right = pygame.transform.flip(self.image, True, False)
 
+        self.s_shoot = pygame.mixer.Sound(load_sound("gun_shot.wav"))
+
     def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
         super().shoot(screen, projectiles, player_pos_x, player_pos_y)
 
@@ -74,12 +86,13 @@ class GunEnemy(Enemy):
                                       player_pos_x, player_pos_y,
                                       25, 1, 3, "bullet"))
         self.ammo -= 1
+        self.s_shoot.play()
 
     def reload(self):
         self.ammo = 6
 
     def hurt(self, damage):
-        super().hurt(damage)
+        return super().hurt(damage)
 
     def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
         super().update(delta_time, wall_group, screen, projectiles, player)
@@ -134,13 +147,16 @@ class GunEnemy(Enemy):
 
 class ShotgunEnemy(Enemy):
     def __init__(self, pos_x, pos_y, particle_group, *groups):
-        super().__init__(pos_x, pos_y, particle_group, "player_idle.png", "button.png", *groups)
+        super().__init__(pos_x, pos_y, particle_group, "shotgun_enemy.png",
+                         "shotgun_enemy_dead.png", *groups)
 
         self.health = 50
         self.speed = 3
 
         self.image_left = self.image
         self.image_right = pygame.transform.flip(self.image, True, False)
+
+        self.s_shoot = pygame.mixer.Sound(load_sound("shotgun_shot.wav"))
 
     def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
         super().shoot(screen, projectiles, player_pos_x, player_pos_y)
@@ -150,9 +166,10 @@ class ShotgunEnemy(Enemy):
                                           player_pos_x, player_pos_y,
                                           25, 1, 3, "bullet", additional_angle=(i - 2) * 5))
         self.shoot_cd = 1.6
+        self.s_shoot.play()
 
     def hurt(self, damage):
-        super().hurt(damage)
+        return super().hurt(damage)
 
     def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
         super().update(delta_time, wall_group, screen, projectiles, player)
@@ -202,12 +219,14 @@ class MinigunEnemy(Enemy):
     def __init__(self, pos_x, pos_y, particle_group, *groups):
         super().__init__(pos_x, pos_y, particle_group, PLAYER_IMAGE, "button.png", *groups)
 
-        self.ammo = 50
+        self.ammo = 0
         self.health = 100
         self.speed = 1
 
         self.image_left = self.image
         self.image_right = pygame.transform.flip(self.image, True, False)
+
+        self.s_shoot = pygame.mixer.Sound(load_sound("minigun_loop.wav"))
 
     def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
         if self.is_dead:
@@ -222,14 +241,17 @@ class MinigunEnemy(Enemy):
 
     def reload(self):
         self.ammo = 50
+        self.s_shoot.play()
 
     def hurt(self, damage):
-        super().hurt(damage)
+        return super().hurt(damage)
 
     def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
         super().update(delta_time, wall_group, screen, projectiles, player)
 
-        if not self.saw_player: return
+        if not self.saw_player:
+            self.s_shoot.stop()
+            return
 
         self.shoot_cd -= delta_time
         if self.ammo <= 0:
@@ -288,6 +310,8 @@ class Box(Enemy):
 
         self.dollars = 4
 
+        self.s_damage = "box"
+
     def hurt(self, damage):
         if self.is_dead: return
 
@@ -305,6 +329,8 @@ class Box(Enemy):
                                        random.randint(0, 360), "ammo.png"))
 
         create_particles((self.rect.centerx, self.rect.centery), "box_chip.png", 20, *self.p_groups)
+
+        return self.s_damage
 
     def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
         if not self.is_dead:
@@ -329,6 +355,8 @@ class Cactus(Enemy):
 
         self.dollars = 0
 
+        self.s_damage = "cactus"
+
     def hurt(self, damage):
         if self.is_dead: return
 
@@ -344,6 +372,8 @@ class Cactus(Enemy):
                            25, 30, 3, "spike", player_friendly=True, additional_angle=i * 30))
 
         create_particles((self.rect.centerx, self.rect.centery), "cactus_chip.png", 30, *self.p_groups)
+
+        return self.s_damage
 
     def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
         if not self.is_dead:
@@ -367,6 +397,8 @@ class Plank(Enemy):
 
         self.dollars = 1
 
+        self.s_damage = "plank"
+
     def hurt(self, damage):
         if self.is_dead: return
 
@@ -376,6 +408,8 @@ class Plank(Enemy):
         self.kill()
 
         create_particles((self.rect.centerx, self.rect.centery), "chip.png", 20, *self.p_groups)
+
+        return self.s_damage
 
     def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
         if not self.is_dead:

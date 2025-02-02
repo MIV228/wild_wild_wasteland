@@ -1,16 +1,19 @@
 import pygame
 import math
 from constants import PROJECTILE_IMAGES, WIDTH, HEIGHT
-from extensions import load_image
+from extensions import load_image, AnimatedSprite
 
 
 class Projectile:
-    def __init__(self, screen, x, y, mouse_x, mouse_y, speed, damage, lifetime, p_type,
-                 player_friendly=False, piercing=False, passes_environment=False, additional_angle=0):
+    def __init__(self, screen, x, y, mouse_x, mouse_y, speed, damage, lifetime, p_type, anim_frames=1,
+                 player_friendly=False, piercing=False, passes_environment=False, additional_angle=0, dont_rotate=False):
         self.angle = math.atan2(y - mouse_y, x - mouse_x) + (additional_angle / 50)
-        self.image = load_image(PROJECTILE_IMAGES[p_type])
-        self.image = pygame.transform.scale_by(self.image, 4)
-        self.image = pygame.transform.rotate(self.image, self.angle * 1.275 * -45)
+        self.anim_sprite = AnimatedSprite(load_image(PROJECTILE_IMAGES[p_type]), anim_frames, 1, x, y)
+        self.anim_sprite.scale(4)
+        if not dont_rotate:
+            self.anim_sprite.rotate(self.angle)
+        self.anim_sprite.update()
+        self.image = self.anim_sprite.image
         self.damage = damage
         self.lifetime = lifetime
         self.x = x - (self.image.get_width() // 2)
@@ -27,6 +30,9 @@ class Projectile:
         self.passes_env = passes_environment
 
     def update(self):
+        self.anim_sprite.update()
+        self.image = self.anim_sprite.image
+
         self.x -= self.vel_x
         self.y -= self.vel_y
 

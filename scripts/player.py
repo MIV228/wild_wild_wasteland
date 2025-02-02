@@ -1,9 +1,9 @@
 import pygame
 
 from constants import TILE_WIDTH, TILE_HEIGHT
-from extensions import load_image, AnimatedSprite
-from resources.projectile import Projectile
-from resources.particles import create_particles
+from extensions import load_image, AnimatedSprite, load_sound
+from scripts.projectile import Projectile
+from scripts.particles import create_particles
 
 
 class Player(pygame.sprite.Sprite):
@@ -37,6 +37,8 @@ class Player(pygame.sprite.Sprite):
 
         self.shoot_cd = 0
 
+        self.s_shotgun = pygame.mixer.Sound(load_sound("shotgun_shot.wav"))
+
     def shoot(self, screen, projectiles):
         if self.ammo <= 0: return
         self.ammo -= 1
@@ -46,71 +48,71 @@ class Player(pygame.sprite.Sprite):
         if 0 < self.spin_seconds < 0.16:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                15, 5, 0.8, "steel_ball", True)
+                                15, 5, 0.8, "steel_ball", 2, True)
         elif 0.16 <= self.spin_seconds < 0.33:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                20, 10, 0.9, "steel_ball", True)
+                                20, 10, 0.9, "steel_ball", 2, True)
         elif 0.33 <= self.spin_seconds < 0.5:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                20, 10, 1, "steel_ball", True)
+                                20, 10, 1, "steel_ball", 2, True)
 
         elif 0.5 <= self.spin_seconds < 0.8:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                20, 20, 2, "steel_ball", True)
+                                20, 20, 2, "spin_ball", 3, True)
         elif 0.8 <= self.spin_seconds < 1.2:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                23, 25, 2, "steel_ball", True)
+                                23, 25, 2, "spin_ball", 3, True)
         elif 1.2 <= self.spin_seconds < 1.5:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                25, 30, 2, "steel_ball", True)
+                                25, 30, 2, "spin_ball", 3, True)
 
         elif 1.5 <= self.spin_seconds < 2.4:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                35, 30, 1, "steel_ball", True, True)
+                                35, 30, 1, "spin_ball", 3, True, True)
         elif 2.4 <= self.spin_seconds < 3.3:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                45, 40, 1, "steel_ball", True, True)
+                                45, 40, 1, "spin_ball", 3, True, True)
         elif 3.3 <= self.spin_seconds < 3.5:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                60, 100, 0.8, "steel_ball", True, True, True)
+                                60, 100, 0.8, "spin_ball", 3, True, True, True)
 
         elif 3.5 <= self.spin_seconds < 5.33:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                45, 50, 1, "steel_ball", True, True)
+                                45, 50, 1, "spin_ball", 3, True, True)
         elif 5.33 <= self.spin_seconds < 6.66:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                40, 60, 1, "steel_ball", True, True)
+                                40, 60, 1, "spin_ball", 3, True, True)
         elif 6.66 <= self.spin_seconds < 8:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                35, 70, 1, "steel_ball", True, True)
+                                35, 70, 1, "spin_ball", 3, True, True)
 
         elif 8 <= self.spin_seconds < 10:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                30, 75, 2, "tornado", True, True, True)
+                                30, 75, 2, "tornado", 2, True, True, True, dont_rotate=True)
         elif 10 <= self.spin_seconds < 12:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                20, 80, 3, "tornado", True, True, True)
+                                28, 80, 3, "tornado", 2, True, True, True, dont_rotate=True)
         elif 12 <= self.spin_seconds < 14:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                10, 85, 4, "tornado", True, True, True)
+                                26, 85, 4, "tornado", 2, True, True, True, dont_rotate=True)
         else:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                5, 90, 8, "tornado", True, True, True)
+                                25, 90, 8, "tornado", 2, True, True, True, dont_rotate=True)
         projectiles.append(bullet)
         self.spin_seconds = 0
 
@@ -127,13 +129,15 @@ class Player(pygame.sprite.Sprite):
                                           pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
                                           40, 15, 1, "bullet", additional_angle=(i - 2) * 3,
                                           player_friendly=True))
+
+        self.s_shotgun.play()
         self.shoot_cd = 0.5
 
     def hurt(self, damage):
         self.health -= damage
 
         if self.health <= 0:
-            self.image = pygame.transform.scale_by(load_image("box.png"), 4)
+            self.image = load_image("player_dead.png")
 
         create_particles((self.rect.centerx, self.rect.centery), "blood.png", 30, *self.p_groups)
 
@@ -176,11 +180,12 @@ class Player(pygame.sprite.Sprite):
                 self.ammo_refill_cd = 5
             self.speed = 5
 
-        self.curr_anim.update()
-        self.image = self.curr_anim.image
+        if self.health > 0:
+            self.curr_anim.update()
+            self.image = self.curr_anim.image
 
-        if not self.facing_right:
-            self.image = pygame.transform.flip(self.image, True, False)
+            if not self.facing_right:
+                self.image = pygame.transform.flip(self.image, True, False)
 
         step_x = 0
         step_y = 0

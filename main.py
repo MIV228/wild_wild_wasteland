@@ -5,12 +5,12 @@ import pygame
 
 from constants import WIDTH, HEIGHT, FPS, LEVEL_MAPS, SPIN_RECTS, HEALTH_OFFSET, LEVEL_MUSIC
 from extensions import load_level, load_image, load_sound
-from resources.camera import Camera
-from resources.enemies import GunEnemy, Box, ShotgunEnemy, Cactus, Plank, MinigunEnemy
-from resources.player import Player
-from resources.sign import Sign
-from resources.tile import Tile
-from screens import start_screen
+from scripts.camera import Camera
+from scripts.enemies import GunEnemy, Box, ShotgunEnemy, Cactus, Plank, MinigunEnemy
+from scripts.player import Player
+from scripts.sign import Sign
+from scripts.tile import Tile
+from scripts.screens import start_screen
 
 
 def terminate():
@@ -44,7 +44,7 @@ def generate_level(level, *delete_groups):
         total_dollars = 0
     pygame.mixer.music.load(load_sound(LEVEL_MUSIC[curr_level]))
     pygame.mixer.music.play(-1)
-    pygame.mixer.music.set_volume(1)
+    pygame.mixer.music.set_volume(0.8)
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -264,6 +264,17 @@ if __name__ == '__main__':
     interface_bg = pygame.transform.scale_by(load_image("interface_bg.png"), 4)
     scope_image = pygame.transform.scale_by(load_image("scope.png"), 4)
 
+    sounds = {
+        "box": pygame.mixer.Sound(load_sound("plank_break.wav")),
+        "plank": pygame.mixer.Sound(load_sound("plank_break.wav")),
+        "cactus": pygame.mixer.Sound(load_sound("cactus_explosion.wav")),
+        "damage": pygame.mixer.Sound(load_sound("damage.wav")),
+        "death": pygame.mixer.Sound(load_sound("death.wav")),
+        "pickup": pygame.mixer.Sound(load_sound("pickup.wav")),
+        "gun": pygame.mixer.Sound(load_sound("gun_shot.wav")),
+        "shotgun": pygame.mixer.Sound(load_sound("shotgun_shot.wav"))
+    }
+
     running = True
     curr_screen = 1  # -2 - конец игры, -1 - конец уровня, 0 - игра, 1... - главное меню
     while running:
@@ -290,6 +301,7 @@ if __name__ == '__main__':
                             curr_screen = -2
                             black_fade = 1
                             pygame.mouse.set_visible(True)
+                            pygame.mixer.music.stop()
                     elif curr_screen == -2:
                         curr_screen = 1
                         black_fade = 1
@@ -380,7 +392,7 @@ if __name__ == '__main__':
                     savefile.seek(0)
                     lines = savefile.read().split("\n")
 
-                    pygame.mixer.music.set_volume(0.4)
+                    pygame.mixer.music.set_volume(0.3)
 
             screen.fill((0, 0, 0))
             # сначала отрисовываем тайлы
@@ -392,7 +404,10 @@ if __name__ == '__main__':
                     if p.player_friendly:
                         for enemy in enemy_group:
                             if p.rect.colliderect(enemy.rect):
-                                enemy.hurt(p.damage)
+                                s_id = enemy.hurt(p.damage)
+                                if s_id is not None:
+                                    sounds[s_id].stop()
+                                    sounds[s_id].play()
                                 if not p.piercing:
                                     p.lifetime = 0
                                 if len(enemy.groups()) == 0:  # нет групп - значит коробка
@@ -400,6 +415,8 @@ if __name__ == '__main__':
                     else:
                         if p.rect.colliderect(player.rect):
                             player.hurt(p.damage)
+                            sounds["damage"].stop()
+                            sounds["damage"].play()
                             if not p.piercing:
                                 p.lifetime = 0
                     if not p.passes_env:
@@ -423,7 +440,8 @@ if __name__ == '__main__':
                             player.health += 1
                         elif p.p_type == "ammo.png":
                             player.ammo += 1
-
+                        sounds["pickup"].stop()
+                        sounds["pickup"].play()
                         pickups_to_delete.append(p)
                 if pickups_to_delete:
                     for p in pickups_to_delete:

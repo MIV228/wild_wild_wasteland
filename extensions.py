@@ -39,7 +39,7 @@ def load_image(name, scale_x=0, scale_y=0, color_key=None) -> Surface:
 
 
 def load_level(filename):
-    filename = "data/" + filename
+    filename = "maps/" + filename
     # читаем уровень, убирая символы перевода строки
     with open(filename, 'r') as mapFile:
         level_map = [line.strip() for line in mapFile]
@@ -59,7 +59,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(x, y)
-        self.update_cd = 0
+        self.cd_update = 0
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
@@ -71,16 +71,26 @@ class AnimatedSprite(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self) -> bool:
-        self.update_cd += 1
-        if self.update_cd >= 10:
+        self.cd_update += 1
+        if self.cd_update >= 10:
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
             self.image = self.frames[self.cur_frame]
-            self.update_cd = 0
+            self.cd_update = 0
             return True
         return False
 
+    def scale(self, scale):
+        for i in range(len(self.frames)):
+            self.frames[i] = pygame.transform.scale_by(self.frames[i], scale)
+        self.image = self.frames[self.cur_frame]
+
+    def rotate(self, angle):
+        for i in range(len(self.frames)):
+            self.frames[i] = pygame.transform.rotate(self.frames[i], angle * 1.275 * -45)
+        self.image = self.frames[self.cur_frame]
+
     def reset(self):
-        self.update_cd = 0
+        self.cd_update = 0
         self.cur_frame = 0
 
 
