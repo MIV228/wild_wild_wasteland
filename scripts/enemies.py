@@ -310,7 +310,7 @@ class Box(Enemy):
 
         self.dollars = 4
 
-        self.s_damage = "box"
+        self.s_damage = "plank"
 
     def hurt(self, damage):
         if self.is_dead: return
@@ -327,6 +327,49 @@ class Box(Enemy):
         for i in range(random.randint(2, 5)):
             self.pickups.append(Pickup(self.screen, self.rect.centerx, self.rect.centery,
                                        random.randint(0, 360), "ammo.png"))
+
+        create_particles((self.rect.centerx, self.rect.centery), "box_chip.png", 20, *self.p_groups)
+
+        return self.s_damage
+
+    def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
+        if not self.is_dead:
+            self.player = player
+            self.pickups = kwargs['pickups']
+            self.screen = screen
+
+
+class SuperBox(Enemy):
+    def __init__(self, pos_x, pos_y, particle_group, *groups):
+        super().__init__(pos_x, pos_y, particle_group, "box.png", "grass.png", *groups)
+        self.image = pygame.transform.scale_by(self.image, 4)
+        self.rect = self.image.get_rect().move(
+            TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
+        # шаг определяем как размер клетки
+        self.health = 1
+
+        self.player = None
+        self.pickups = None
+        self.screen = None
+        self.wall_group = groups[1]
+
+        self.dollars = 4
+
+        self.s_damage = "plank"
+
+    def hurt(self, damage):
+        if self.is_dead: return
+
+        self.health -= 1
+        self.image = self.dead_image
+        self.is_dead = True
+        self.kill()
+
+        for i in range(5):
+            self.pickups.append(Pickup(self.screen, self.rect.centerx, self.rect.centery,
+                                       random.randint(0, 360), "super_ammo.png"))
+            self.pickups.append(Pickup(self.screen, self.rect.centerx, self.rect.centery,
+                                       random.randint(0, 360), "heart.png"))
 
         create_particles((self.rect.centerx, self.rect.centery), "box_chip.png", 20, *self.p_groups)
 
@@ -442,11 +485,12 @@ class MinigunBox(Enemy):
         self.image = self.dead_image
         self.is_dead = True
         self.kill()
+        p = Pickup(self.screen, self.rect.centerx, self.rect.centery,
+                   random.randint(0, 360), "minigun.png")
+        p.speed = 25
+        self.pickups.append(p)
 
-        self.pickups.append(Pickup(self.screen, self.rect.centerx, self.rect.centery,
-                                   random.randint(0, 360), "minigun.png"))
-
-        create_particles((self.rect.centerx, self.rect.centery), "box_chip.png", 20, *self.p_groups)
+        create_particles((self.rect.centerx, self.rect.centery), "ammo.png", 20, *self.p_groups)
 
         return self.s_damage
 

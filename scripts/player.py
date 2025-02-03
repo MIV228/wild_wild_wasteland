@@ -42,6 +42,7 @@ class Player(pygame.sprite.Sprite):
         self.s_shotgun = pygame.mixer.Sound(load_sound("shotgun_shot.wav"))
 
         self.curr_weapon = "shotgun"
+        self.ammo_requirement = 10
 
     def shoot(self, screen, projectiles):
         if self.ammo <= 0: return
@@ -142,12 +143,12 @@ class Player(pygame.sprite.Sprite):
 
             projectiles.append(Projectile(screen, self.rect.centerx, self.rect.centery,
                                           pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                          40, 10, 1, "bullet",
-                                          additional_angle=random.randint(-2, 2),
+                                          50, 20, 1, "bullet",
+                                          additional_angle=random.randint(-1, 1),
                                           player_friendly=True))
 
             self.s_shotgun.play()
-            self.shoot_cd = 0.1
+            self.shoot_cd = 0.075
 
     def hurt(self, damage):
         self.health -= damage
@@ -187,7 +188,7 @@ class Player(pygame.sprite.Sprite):
                 self.speed = 9
 
             if mousebuttons[2]:
-                if self.ammo >= 10 and self.shoot_cd <= 0:
+                if self.ammo >= self.ammo_requirement and self.shoot_cd <= 0:
                     self.shotgun(screen, projectiles)
         else:
             self.ammo_refill_cd -= delta_time

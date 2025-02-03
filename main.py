@@ -6,7 +6,7 @@ import pygame
 from constants import WIDTH, HEIGHT, FPS, LEVEL_MAPS, SPIN_RECTS, HEALTH_OFFSET, LEVEL_MUSIC
 from extensions import load_level, load_image, load_sound
 from scripts.camera import Camera
-from scripts.enemies import GunEnemy, Box, ShotgunEnemy, Cactus, Plank, MinigunEnemy
+from scripts.enemies import GunEnemy, Box, ShotgunEnemy, Cactus, Plank, MinigunEnemy, MinigunBox, SuperBox
 from scripts.player import Player
 from scripts.sign import Sign
 from scripts.tile import Tile
@@ -19,8 +19,8 @@ def terminate():
 
 
 def generate_level(level, *delete_groups):
-    global kills, level_time, tiles_group, player_group, enemy_group, dead_enemies, curr_level,\
-        sign_group, wall_group, particle_group, level_objective_group, all_sprites,\
+    global kills, level_time, tiles_group, player_group, enemy_group, dead_enemies, curr_level, \
+        sign_group, wall_group, particle_group, level_objective_group, all_sprites, \
         property_damage, total_dollars, level_end_group
     if tiles_group:
         tiles_group.empty()
@@ -121,6 +121,79 @@ def generate_level(level, *delete_groups):
                 elif level[y][x] == "5":
                     Tile('empty', x, y, tiles_group, all_sprites)
                     Sign(x, y, "destroy strongholds to get $20000 extra", sign_group, all_sprites)
+            elif curr_level == 2:
+                if level[y][x] == '.':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                elif level[y][x] == '#':
+                    if x != 0 and x != len(level[0]) - 1 and y != 0 and y != len(level) - 1:
+                        if level[y][x + 1] != "#":
+                            if level[y - 1][x] != "#":
+                                Tile('sand_wall3', x, y, tiles_group, wall_group, all_sprites)
+                            elif level[y + 1][x] != "#":
+                                Tile('sand_wall5', x, y, tiles_group, wall_group, all_sprites)
+                            else:
+                                Tile('sand_wall4', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y][x - 1] != "#":
+                            if level[y - 1][x] != "#":
+                                Tile('sand_wall1', x, y, tiles_group, wall_group, all_sprites)
+                            elif level[y + 1][x] != "#":
+                                Tile('sand_wall7', x, y, tiles_group, wall_group, all_sprites)
+                            else:
+                                Tile('sand_wall8', x, y, tiles_group, wall_group, all_sprites)
+                            # сверху - снизу
+                        elif level[y - 1][x] != "#":
+                            Tile('sand_wall2', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y + 1][x] != "#":
+                            Tile('sand_wall6', x, y, tiles_group, wall_group, all_sprites)
+                            # по диагонали
+                        elif level[y + 1][x - 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y + 1][x + 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y - 1][x - 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        elif level[y - 1][x + 1] != "#":
+                            Tile('sand_wall', x, y, tiles_group, wall_group, all_sprites)
+                        else:
+                            Tile('sand_wall', x, y, tiles_group, all_sprites)
+                    else:
+                        Tile('sand_wall', x, y, tiles_group, all_sprites)
+                elif level[y][x] == '@':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    new_player = Player(x, y, particle_group, player_group, all_sprites)
+                elif level[y][x] == 'E':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    GunEnemy(x, y, particle_group, enemy_group, all_sprites)
+                elif level[y][x] == '+':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    SuperBox(x, y, particle_group, enemy_group, wall_group, all_sprites)
+                elif level[y][x] == '!':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    SuperBox(x, y, particle_group, enemy_group, level_objective_group, wall_group,
+                             all_sprites)
+                elif level[y][x] == 'S':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    ShotgunEnemy(x, y, particle_group, enemy_group, all_sprites)
+                elif level[y][x] == 'M':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    MinigunEnemy(x, y, particle_group, enemy_group, all_sprites)
+                elif level[y][x] == '*':
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Cactus(x, y - 1, particle_group, enemy_group, wall_group, all_sprites)
+                elif level[y][x] == "=":
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Plank(x, y, particle_group, enemy_group, wall_group, all_sprites)
+                elif level[y][x] == "]":
+                    Tile('empty', x, y, tiles_group, wall_group, all_sprites)
+                elif level[y][x] == "[":
+                    Tile('empty', x, y, tiles_group, level_end_group, all_sprites)
+                elif level[y][x] == "0":
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    Sign(x, y, "hold [RMB] to shoot", sign_group, all_sprites)
+                elif level[y][x] == "m":
+                    Tile('empty', x, y, tiles_group, all_sprites)
+                    MinigunBox(x, y, particle_group, enemy_group, wall_group, all_sprites)
+                    pygame.mixer.music.set_volume(0)
             else:
                 if level[y][x] == '.':
                     Tile('empty', x, y, tiles_group, all_sprites)
@@ -265,7 +338,7 @@ if __name__ == '__main__':
     scope_image = pygame.transform.scale_by(load_image("scope.png"), 4)
 
     sounds = {
-        "box": pygame.mixer.Sound(load_sound("plank_break.wav")),
+        "box": pygame.mixer.Sound(load_sound("box_break.wav")),
         "plank": pygame.mixer.Sound(load_sound("plank_break.wav")),
         "cactus": pygame.mixer.Sound(load_sound("cactus_explosion.wav")),
         "damage": pygame.mixer.Sound(load_sound("damage.wav")),
@@ -440,12 +513,16 @@ if __name__ == '__main__':
                             player.health += 1
                         elif p.p_type == "ammo.png":
                             player.ammo += 1
+                        elif p.p_type == "super_ammo.png":
+                            player.ammo += 20
                         elif p.p_type == "minigun.png":
                             player.curr_weapon = "minigun"
                             player.s_shotgun = pygame.mixer.Sound(load_sound("gun_shot.wav"))
+                            player.s_shotgun.set_volume(0.5)
+                            player.ammo_requirement = 1
                             pygame.mixer.music.load(load_sound("last_call.wav"))
                             pygame.mixer.music.play(-1)
-                            pygame.mixer.music.set_volume(0.8)
+                            pygame.mixer.music.set_volume(1)
                         sounds["pickup"].stop()
                         sounds["pickup"].play()
                         pickups_to_delete.append(p)

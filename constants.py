@@ -28,12 +28,14 @@ PROJECTILE_IMAGES = {
 
 LEVEL_MAPS = {
     0: "tutorial.txt",
-    1: "map1.txt"
+    1: "map1.txt",
+    2: "map2.txt"
 }
 
 LEVEL_MUSIC = {
     0: "tutorial.mp3",
-    1: "gunpowder_canyon.mp3"
+    1: "gunpowder_canyon.mp3",
+    2: "tutorial.mp3"
 }
 
 PLAYER_IMAGE = 'mar.png'

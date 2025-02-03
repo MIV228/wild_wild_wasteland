@@ -14,8 +14,9 @@ def start_screen(button_group) -> None:
 
     b_level1 = Button(64, 360, "tutorial", 0, 0)
     b_level2 = Button(64, 450, "gunpowder canyon", 0, 1)
+    b_level3 = Button(64, 540, "last call", 0, 2)
     #b_level3 = Button(64, 540, "metal marshes", 0, 2)
-    b_level_back = Button(64, 630, "back", 2, 1)
+    b_level_back = Button(64, 720, "back", 2, 1)
 
     # сейв - файл:
     # 1) total kills
@@ -38,7 +39,7 @@ def start_screen(button_group) -> None:
         button_group.append([b_start_game, Button(64, 450, "quit", 1)])
     else:
         button_group.append([b_start_game, b_stats, b_quit])
-    button_group.append([b_level1, b_level2, b_level_back])
+    button_group.append([b_level1, b_level2, b_level3, b_level_back])
     button_group.append([b_stat_dollars, b_stat_kills, b_stat_pd, b_stat_sh, b_stat_back])
 
     f.close()
