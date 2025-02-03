@@ -1,3 +1,5 @@
+import random
+
 import pygame
 
 from constants import TILE_WIDTH, TILE_HEIGHT
@@ -38,6 +40,8 @@ class Player(pygame.sprite.Sprite):
         self.shoot_cd = 0
 
         self.s_shotgun = pygame.mixer.Sound(load_sound("shotgun_shot.wav"))
+
+        self.curr_weapon = "shotgun"
 
     def shoot(self, screen, projectiles):
         if self.ammo <= 0: return
@@ -122,16 +126,28 @@ class Player(pygame.sprite.Sprite):
             self.change_animation(self.a_idle)
 
     def shotgun(self, screen, projectiles):
-        self.ammo -= 10
+        if self.curr_weapon == "shotgun":
+            self.ammo -= 10
 
-        for i in range(5):
+            for i in range(5):
+                projectiles.append(Projectile(screen, self.rect.centerx, self.rect.centery,
+                                              pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
+                                              40, 15, 1, "bullet", additional_angle=(i - 2) * 3,
+                                              player_friendly=True))
+
+            self.s_shotgun.play()
+            self.shoot_cd = 0.5
+        elif self.curr_weapon == "minigun":
+            self.ammo -= 1
+
             projectiles.append(Projectile(screen, self.rect.centerx, self.rect.centery,
                                           pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                          40, 15, 1, "bullet", additional_angle=(i - 2) * 3,
+                                          40, 10, 1, "bullet",
+                                          additional_angle=random.randint(-2, 2),
                                           player_friendly=True))
 
-        self.s_shotgun.play()
-        self.shoot_cd = 0.5
+            self.s_shotgun.play()
+            self.shoot_cd = 0.1
 
     def hurt(self, damage):
         self.health -= damage

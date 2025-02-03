@@ -440,6 +440,12 @@ if __name__ == '__main__':
                             player.health += 1
                         elif p.p_type == "ammo.png":
                             player.ammo += 1
+                        elif p.p_type == "minigun.png":
+                            player.curr_weapon = "minigun"
+                            player.s_shotgun = pygame.mixer.Sound(load_sound("gun_shot.wav"))
+                            pygame.mixer.music.load(load_sound("last_call.wav"))
+                            pygame.mixer.music.play(-1)
+                            pygame.mixer.music.set_volume(0.8)
                         sounds["pickup"].stop()
                         sounds["pickup"].play()
                         pickups_to_delete.append(p)

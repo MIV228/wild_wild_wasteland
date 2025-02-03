@@ -415,3 +415,43 @@ class Plank(Enemy):
         if not self.is_dead:
             self.player = player
             self.screen = screen
+
+
+class MinigunBox(Enemy):
+    def __init__(self, pos_x, pos_y, particle_group, *groups):
+        super().__init__(pos_x, pos_y, particle_group, "minigun_box.png", "grass.png", *groups)
+        self.image = pygame.transform.scale_by(self.image, 4)
+        self.rect = self.image.get_rect().move(
+            TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
+        # шаг определяем как размер клетки
+        self.health = 1
+
+        self.player = None
+        self.pickups = None
+        self.screen = None
+        self.wall_group = groups[1]
+
+        self.dollars = 4
+
+        self.s_damage = "box"
+
+    def hurt(self, damage):
+        if self.is_dead: return
+
+        self.health -= 1
+        self.image = self.dead_image
+        self.is_dead = True
+        self.kill()
+
+        self.pickups.append(Pickup(self.screen, self.rect.centerx, self.rect.centery,
+                                   random.randint(0, 360), "minigun.png"))
+
+        create_particles((self.rect.centerx, self.rect.centery), "box_chip.png", 20, *self.p_groups)
+
+        return self.s_damage
+
+    def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
+        if not self.is_dead:
+            self.player = player
+            self.pickups = kwargs['pickups']
+            self.screen = screen
