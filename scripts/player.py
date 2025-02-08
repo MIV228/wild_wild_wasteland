@@ -105,19 +105,19 @@ class Player(pygame.sprite.Sprite):
         elif 8 <= self.spin_seconds < 10:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                30, 75, 2, "tornado", 2, True, True, True, dont_rotate=True)
+                                30, 10, 2, "tornado", 2, True, True, True, dont_rotate=True)
         elif 10 <= self.spin_seconds < 12:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                28, 80, 3, "tornado", 2, True, True, True, dont_rotate=True)
+                                28, 15, 3, "tornado", 2, True, True, True, dont_rotate=True)
         elif 12 <= self.spin_seconds < 14:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                26, 85, 4, "tornado", 2, True, True, True, dont_rotate=True)
+                                26, 20, 4, "tornado", 2, True, True, True, dont_rotate=True)
         else:
             bullet = Projectile(screen, self.rect.centerx, self.rect.centery,
                                 pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                25, 90, 8, "tornado", 2, True, True, True, dont_rotate=True)
+                                25, 30, 8, "tornado", 2, True, True, True, dont_rotate=True)
         projectiles.append(bullet)
         self.spin_seconds = 0
 
@@ -143,7 +143,7 @@ class Player(pygame.sprite.Sprite):
 
             projectiles.append(Projectile(screen, self.rect.centerx, self.rect.centery,
                                           pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1],
-                                          50, 20, 1, "bullet",
+                                          50, 10, 1, "bullet",
                                           additional_angle=random.randint(-1, 1),
                                           player_friendly=True))
 
@@ -177,15 +177,15 @@ class Player(pygame.sprite.Sprite):
             # 0-0.5 сек - первый уровень (белый), 0.5-1.5 - 2 голубой, 1.5-3.5 - 3 золотой,
             # 3.5-8 - 4 оранжевый, 8-14 - 5 красный
             if 0 <= self.spin_seconds < 0.5:
-                self.speed = 5
-            elif 0.5 <= self.spin_seconds < 1.5:
                 self.speed = 6
-            elif 1.5 <= self.spin_seconds < 3.5:
+            elif 0.5 <= self.spin_seconds < 1.5:
                 self.speed = 7
-            elif 3.5 <= self.spin_seconds < 8:
+            elif 1.5 <= self.spin_seconds < 3.5:
                 self.speed = 8
-            else:
+            elif 3.5 <= self.spin_seconds < 8:
                 self.speed = 9
+            else:
+                self.speed = 10
 
             if mousebuttons[2]:
                 if self.ammo >= self.ammo_requirement and self.shoot_cd <= 0:

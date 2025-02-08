@@ -48,8 +48,9 @@ class Enemy(pygame.sprite.Sprite):
         if self.health <= 0:
             self.image = self.dead_image
             self.is_dead = True
-
-        create_particles((self.rect.centerx, self.rect.centery), "blood.png", 40, *self.p_groups)
+            create_particles((self.rect.centerx, self.rect.centery), "blood.png", 50, *self.p_groups)
+        else:
+            create_particles((self.rect.centerx, self.rect.centery), "blood.png", 20, *self.p_groups)
 
         return "damage"
 
@@ -70,7 +71,7 @@ class Enemy(pygame.sprite.Sprite):
 
 class GunEnemy(Enemy):
     def __init__(self, pos_x, pos_y, particle_group, *groups):
-        super().__init__(pos_x, pos_y, particle_group, PLAYER_IMAGE, "button.png", *groups)
+        super().__init__(pos_x, pos_y, particle_group, "gun_enemy.png", "gun_enemy_dead.png", *groups)
 
         self.ammo = 6
 
@@ -78,6 +79,7 @@ class GunEnemy(Enemy):
         self.image_right = pygame.transform.flip(self.image, True, False)
 
         self.s_shoot = pygame.mixer.Sound(load_sound("gun_shot.wav"))
+        self.s_shoot.set_volume(0.8)
 
     def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
         super().shoot(screen, projectiles, player_pos_x, player_pos_y)
@@ -157,6 +159,7 @@ class ShotgunEnemy(Enemy):
         self.image_right = pygame.transform.flip(self.image, True, False)
 
         self.s_shoot = pygame.mixer.Sound(load_sound("shotgun_shot.wav"))
+        self.s_shoot.set_volume(0.7)
 
     def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
         super().shoot(screen, projectiles, player_pos_x, player_pos_y)
@@ -217,7 +220,11 @@ class ShotgunEnemy(Enemy):
 
 class MinigunEnemy(Enemy):
     def __init__(self, pos_x, pos_y, particle_group, *groups):
-        super().__init__(pos_x, pos_y, particle_group, PLAYER_IMAGE, "button.png", *groups)
+        super().__init__(pos_x, pos_y, particle_group, "minigun_enemy.png",
+                         "minigun_enemy_dead.png", *groups)
+        self.dead_image = pygame.transform.scale2x(self.dead_image)
+        self.rect = self.image.get_rect().move(
+            TILE_WIDTH * pos_x + 15, TILE_HEIGHT * pos_y + 5)
 
         self.ammo = 0
         self.health = 100
@@ -227,6 +234,7 @@ class MinigunEnemy(Enemy):
         self.image_right = pygame.transform.flip(self.image, True, False)
 
         self.s_shoot = pygame.mixer.Sound(load_sound("minigun_loop.wav"))
+        self.s_shoot.set_volume(0.4)
 
     def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
         if self.is_dead:
@@ -249,6 +257,9 @@ class MinigunEnemy(Enemy):
     def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
         super().update(delta_time, wall_group, screen, projectiles, player)
 
+        if self.is_dead:
+            self.s_shoot.stop()
+
         if not self.saw_player:
             self.s_shoot.stop()
             return
@@ -263,6 +274,108 @@ class MinigunEnemy(Enemy):
                 self.shoot(screen, projectiles, player.rect.centerx, player.rect.centery)
                 if self.ammo == 0:
                     self.shoot_cd = 7
+
+        step_x = self.vel_x
+        step_y = self.vel_y
+
+        self.move_cd -= delta_time
+        if self.move_cd <= 0:
+            self.vel_x = random.choice((-self.speed, self.speed))
+            self.vel_y = random.choice((-self.speed, self.speed))
+            self.move_cd = random.choice((0.8, 1, 1.2, 1.5, 1.7))
+
+        if self.vel_x == 0 and self.vel_y == 0: return
+
+        apply_x = True
+        next_rect_h = self.rect.move(step_x, 0)
+        # перебираем все спрайты стен и проверяем, есть ли столкновение
+        for wall in wall_group:
+            if next_rect_h.colliderect(wall.rect):
+                apply_x = False
+                break
+
+        apply_y = True
+        next_rect_v = self.rect.move(0, step_y)
+        # перебираем все спрайты стен и проверяем, есть ли столкновение
+        for wall in wall_group:
+            if next_rect_v.colliderect(wall.rect):
+                apply_y = False
+                break
+
+        self.rect = self.rect.move(step_x if apply_x else 0, step_y if apply_y else 0)
+
+
+class MinigunBoss(Enemy):
+    def __init__(self, pos_x, pos_y, particle_group, *groups):
+        super().__init__(pos_x, pos_y, particle_group, "minigun_boss.png",
+                         "minigun_enemy_dead.png", *groups)
+        self.dead_image = pygame.transform.scale_by(self.dead_image, 4)
+
+        self.ammo = 0
+        self.health = 3000
+        self.speed = 1
+
+        self.image_left = self.image
+        self.image_right = pygame.transform.flip(self.image, True, False)
+
+        self.s_shoot = pygame.mixer.Sound(load_sound("minigun_loop.wav"))
+        self.s_shotgun = pygame.mixer.Sound(load_sound("shotgun_shot.wav"))
+        self.s_shoot.set_volume(0.4)
+
+        self.curr_attack = 1
+
+    def shoot(self, screen, projectiles, player_pos_x, player_pos_y):
+        if self.is_dead:
+            return
+
+        if self.curr_attack == 0:
+            projectiles.append(Projectile(screen, self.rect.centerx, self.rect.centery,
+                                          player_pos_x, player_pos_y,
+                                          25, 1, 3, "bullet",
+                                          additional_angle=random.choice([x for x in range(-5, 5)])))
+            self.shoot_cd = 0.15
+            self.ammo -= 1
+        elif self.curr_attack == 1:
+            for i in range(5):
+                projectiles.append(Projectile(screen, self.rect.centerx, self.rect.centery,
+                                              player_pos_x, player_pos_y,
+                                              25, 1, 3, "bullet",
+                                              additional_angle=(i - 2) * 5))
+            self.shoot_cd = 0.5
+            self.ammo -= 1
+            self.s_shotgun.play()
+
+    def reload(self):
+        self.curr_attack = (self.curr_attack + 1) % 2
+        if self.curr_attack == 0:
+            self.ammo = 50
+            self.s_shoot.play()
+        elif self.curr_attack == 1:
+            self.ammo = 5
+
+    def hurt(self, damage):
+        return super().hurt(damage)
+
+    def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
+        super().update(delta_time, wall_group, screen, projectiles, player)
+
+        if self.is_dead:
+            self.s_shoot.stop()
+
+        if not self.saw_player:
+            self.s_shoot.stop()
+            return
+
+        self.shoot_cd -= delta_time
+        if self.ammo <= 0:
+            if self.shoot_cd <= 0:
+                self.reload()
+        else:
+            self.shoot_cd -= delta_time
+            if self.shoot_cd <= 0:
+                self.shoot(screen, projectiles, player.rect.centerx, player.rect.centery)
+                if self.ammo == 0:
+                    self.shoot_cd = 4
 
         step_x = self.vel_x
         step_y = self.vel_y
@@ -498,4 +611,41 @@ class MinigunBox(Enemy):
         if not self.is_dead:
             self.player = player
             self.pickups = kwargs['pickups']
+            self.screen = screen
+
+
+class Brick(Enemy):
+    def __init__(self, pos_x, pos_y, particle_group, *groups):
+        super().__init__(pos_x, pos_y, particle_group, "brick.png", "grass.png", *groups)
+        self.image = pygame.transform.scale_by(self.image, 4)
+        self.rect = self.image.get_rect().move(
+            TILE_WIDTH * pos_x, TILE_HEIGHT * pos_y)
+        # шаг определяем как размер клетки
+        self.health = 50
+
+        self.player = None
+        self.screen = None
+        self.wall_group = groups[1]
+
+        self.dollars = 10
+
+        self.s_damage = "brick"
+
+    def hurt(self, damage):
+        if self.is_dead: return
+
+        self.health -= damage
+        if self.health <= 0:
+            self.image = self.dead_image
+            self.is_dead = True
+            self.kill()
+            create_particles((self.rect.centerx, self.rect.centery), "brick_chip.png", 25, *self.p_groups)
+        else:
+            create_particles((self.rect.centerx, self.rect.centery), "brick_chip.png", 10, *self.p_groups)
+
+        return "brick"
+
+    def update(self, delta_time, wall_group, screen: pygame.Surface, projectiles, player, **kwargs) -> None:
+        if not self.is_dead:
+            self.player = player
             self.screen = screen

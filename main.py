@@ -457,8 +457,8 @@ if __name__ == '__main__':
                     savefile.truncate(0)
                     savefile.write("\n".join([str(int(lines[0]) + kills),
                                               str(int(lines[1]) + property_damage),
-                                              str(int(lines[2]) + 1 if len(
-                                                  level_objective_group) == 0 else 0),
+                                              str(int(lines[2]) + (1 if len(
+                                                  level_objective_group) == 0 else 0)),
                                               str(int(lines[3]) + total_dollars),
                                               str(curr_level) if curr_level > int(lines[4]) else
                                               lines[4]]))

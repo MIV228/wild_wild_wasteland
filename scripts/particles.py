@@ -3,7 +3,7 @@ from constants import WIDTH, HEIGHT
 from extensions import load_image
 import random
 
-screen_rect = (0, 0, WIDTH, HEIGHT)
+screen_rect = pygame.Rect(0, 0, WIDTH, HEIGHT)
 
 class Particle(pygame.sprite.Sprite):
     def __init__(self, pos, image, dx, dy, *groups):
@@ -32,6 +32,8 @@ class Particle(pygame.sprite.Sprite):
 
 
 def create_particles(position, image, count, *groups):
+    if not screen_rect.collidepoint(position):
+        return
     numbers = range(-12, 12)
     for _ in range(count):
         Particle(position, image, random.choice(numbers), random.choice(numbers), *groups)
